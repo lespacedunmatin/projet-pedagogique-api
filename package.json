@@ -1,14 +1,43 @@
 {
-  "name": "api",
+  "name": "projet-pedagogique-api",
   "version": "1.0.0",
-  "description": "",
-  "main": "dist/index.js",
-  "scripts": {
-    "build": "tsc"
+  "private": true,
+  "description": "Une API pour la gestion de projets pédagogiques dans l’éducation populaire (centre de loisirs, scoutisme, etc.).",
+  "homepage": "https://github.com/lespacedunmatin/projet-pedagogique-api#readme",
+  "bugs": {
+    "url": "https://github.com/lespacedunmatin/projet-pedagogique-api/issues"
   },
-  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lespacedunmatin/projet-pedagogique-api.git"
+  },
+  "license": "ISC",
+  "author": "Olivier Gendrin <olivier@lespacedunmatin.info>",
+  "type": "commonjs",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsc && npm start",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
+    "@types/supertest": "^6.0.3",
+    "jest": "^30.2.0",
+    "supertest": "^7.2.2",
+    "ts-jest": "^29.4.6",
     "typescript": "^5.5.3"
   },
-  "private": true
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "mariadb": "^3.4.5",
+    "sequelize": "^6.37.7"
+  }
 }

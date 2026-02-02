@@ -3,11 +3,11 @@
 ## Phase 1 : Initialisation et infrastructure (semaine 1)
 
 ### 1.1 Configuration du projet
-- [ ] Initialiser le projet Node.js avec `npm init`
-- [ ] Installer les dépendances de base (express, dotenv, helmet, cors)
-- [ ] Créer la structure de dossiers (`/src`, `/tests`, `/config`)
-- [ ] Configurer les variables d'environnement (`.env`, `.env.example`)
-- [ ] Mettre en place le fichier `server.js` et la configuration Express
+- [x] Initialiser le projet Node.js avec `npm init`
+- [x] Installer les dépendances de base (express, dotenv, helmet, cors)
+- [x] Configurer les variables d'environnement (`.env`, `.env.example`)
+- [x] Mettre en place le fichier `server.js` et la configuration Express
+- [ ] Créer la structure de dossiers (`/src`, `/tests`)
 
 ### 1.2 Base de données
 - [ ] Créer la base de données MariaDB
