@@ -144,9 +144,7 @@ src/
 ├── models/
 │   ├── Animateur.ts       # Modèle Animateur
 │   └── index.ts           # Exports
-├── app.ts                 # Application Express
 ├── server.ts              # Point d'entrée serveur
-└── index.ts               # Exports principaux
 
 dist/                      # Compilé TypeScript (généré)
 ```

@@ -59,7 +59,7 @@ api/
 │   ├── src/models/
 │   │   ├── Animateur.ts                 ✅ Modèle TypeScript
 │   │   └── index.ts                     ✅ Exports
-│   └── src/app.ts, server.ts, index.ts ✅ Existants
+│   └── src/server.ts                    ✅ Existant
 │
 ├── 🔧 Compilation
 │   └── dist/

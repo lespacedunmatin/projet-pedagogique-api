@@ -42,7 +42,7 @@ api/
 │   ├── middlewares/    # Auth, validation, error handling
 │   ├── utils/          # Fonctions utilitaires
 │   ├── services/       # Services (email, etc.)
-│   └── index.ts        # Point d'entrée
+│   └── server.ts        # Point d'entrée
 ├── tests/              # Tests unitaires et d'intégration
 └── dist/               # Sortie compilée (générée)
 ```

@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "projet_peda",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

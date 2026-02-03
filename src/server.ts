@@ -1,9 +1,7 @@
-import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-
-dotenv.config();
+import animateursRouter from './routes/animateurs';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,6 +16,9 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/status', (req, res) => {
   res.json({ message: 'le serveur fonctionne' });
 });
+
+// Routes animateurs
+app.use('/animateurs', animateursRouter);
 
 // Start server
 app.listen(PORT, () => {
