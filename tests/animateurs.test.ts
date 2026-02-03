@@ -9,6 +9,7 @@ describe('POST /animateurs', () => {
 
   beforeAll(async () => {
     // S'assurer que la table Animateurs est vide avant de commencer les tests
+    console.log('Before all tests: Cleaning Animateur table');
     await Animateur.destroy({ where: {}, truncate: true });
   });
 
@@ -22,10 +23,11 @@ describe('POST /animateurs', () => {
       return;
     }
 
+    console.log('afterEach: Deleting animateur with id', trashBin);
     await Animateur.destroy({ where: {id: trashBin}, truncate: true });
   });
 
-  it('devrait créer un nouvel animateur avec un mot de passe chiffré', async () => {
+  fit('devrait créer un nouvel animateur avec un mot de passe chiffré', async () => {
     const animateurData = {
       email: 'test@example.com',
       password: 'password123',

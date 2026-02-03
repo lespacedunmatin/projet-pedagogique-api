@@ -1,3 +1,5 @@
 import Animateur from './Animateur';
+import Projet from './Projet';
+import AnimateurProjet from './AnimateurProjet';
 
-export { Animateur };
+export { Animateur, Projet, AnimateurProjet };

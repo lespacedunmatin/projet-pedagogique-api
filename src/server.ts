@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import animateursRouter from './routes/animateurs';
+import projetsRouter from './routes/projets';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,6 +20,9 @@ app.get('/status', (req, res) => {
 
 // Routes animateurs
 app.use('/animateurs', animateursRouter);
+
+// Routes projets
+app.use('/projets', projetsRouter);
 
 // Start server
 app.listen(PORT, () => {

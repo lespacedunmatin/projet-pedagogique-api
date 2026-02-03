@@ -1,5 +1,7 @@
 import sequelize from '../database/config';
 import Animateur from '../models/Animateur';
+import Projet from '../models/Projet';
+import AnimateurProjet from '../models/AnimateurProjet';
 import * as crypto from 'crypto';
 import { Sequelize } from 'sequelize';
 
