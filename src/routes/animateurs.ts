@@ -101,4 +101,88 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * GET /animateurs/:id
+ * Récupère un animateur spécifique par son ID
+ */
+router.get('/:id', async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+
+    const animateur = await Animateur.findByPk(id, {
+      attributes: {
+        exclude: ['password'], // Ne pas retourner le mot de passe
+      },
+    });
+
+    // Vérifier que l'animateur existe et n'est pas supprimé
+    if (!animateur) {
+      return res.status(404).json({
+        error: 'Animateur non trouvé',
+      });
+    }
+
+    // Vérifier que l'animateur existe et n'est pas supprimé
+    if (animateur && animateur.deleted_at !== null) {
+      return res.status(410).json({
+        error: 'Animateur supprimé',
+      });
+    }
+
+    return res.status(200).json({
+      animateur,
+    });
+  } catch (error) {
+    console.error('Erreur lors de la récupération de l\'animateur:', error);
+    return res.status(500).json({
+      error: 'Erreur lors de la récupération de l\'animateur',
+    });
+  }
+});
+
+/**
+ * DELETE /animateurs/:id
+ * Effectue un soft delete en renseignant le champ deleted_at
+ */
+router.delete('/:id', async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+
+    // Vérifier que l'animateur existe
+    const animateur = await Animateur.findByPk(id);
+
+    if (!animateur) {
+      return res.status(404).json({
+        error: 'Animateur non trouvé',
+      });
+    }
+
+    // Vérifier que l'animateur n'est pas déjà supprimé
+    if (animateur.deleted_at !== null) {
+      return res.status(410).json({
+        error: 'Cet animateur a déjà été supprimé',
+      });
+    }
+
+    // Effectuer le soft delete en mettant à jour deleted_at
+    const now = new Date();
+    await animateur.update({ deleted_at: now });
+
+    return res.status(200).json({
+      message: 'Animateur supprimé avec succès',
+      animateur: {
+        id: animateur.id,
+        email: animateur.email,
+        nom: animateur.nom,
+        deleted_at: now,
+      },
+    });
+  } catch (error) {
+    console.error('Erreur lors de la suppression de l\'animateur:', error);
+    return res.status(500).json({
+      error: 'Erreur lors de la suppression de l\'animateur',
+    });
+  }
+});
+
 export default router;

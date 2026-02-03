@@ -120,4 +120,7 @@ développement phase par phase pour l'implémentation.
 
 La documentation du projet doit être succincte. Ne pas inclure de longs extraits de code ou de documentation déjà
 présents dans d'autres fichiers. Se concentrer sur les informations essentielles pour comprendre et travailler avec le
-code.
+code. Ne pas créer plus d’un fichier de documentation par fonctionnalité.
+
+Quand tu écris en français, respecte les règles de typographie française (espaces insécables avant les ponctuations
+doubles, guillemets français, etc.).

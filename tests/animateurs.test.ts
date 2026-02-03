@@ -229,3 +229,147 @@ describe('GET /animateurs', () => {
   });
 });
 
+describe('GET /animateurs/:id', () => {
+  let animateurId: string;
+
+  beforeEach(async () => {
+    // Créer un animateur de test
+    const animateur = await Animateur.create({
+      email: 'test@example.com',
+      password: await bcrypt.hash('password123', 10),
+      nom: 'Test Animateur',
+      bio: 'Bio de test',
+    });
+    animateurId = animateur.id;
+  });
+
+  afterEach(async () => {
+    // Nettoyer après chaque test
+    await Animateur.destroy({ where: { id: animateurId } });
+  });
+
+  it('devrait récupérer un animateur par son ID', async () => {
+    const response = await request(app)
+      .get(`/animateurs/${animateurId}`)
+      .expect(200);
+
+    expect(response.body.animateur).toBeDefined();
+    expect(response.body.animateur.id).toBe(animateurId);
+    expect(response.body.animateur.email).toBe('test@example.com');
+    expect(response.body.animateur.nom).toBe('Test Animateur');
+    expect(response.body.animateur.bio).toBe('Bio de test');
+    expect(response.body.animateur.password).toBeUndefined(); // Mot de passe ne doit pas être retourné
+  });
+
+  it('devrait retourner une erreur 404 si l\'animateur n\'existe pas', async () => {
+    const fakeId = '550e8400-e29b-41d4-a716-446655440999';
+    const response = await request(app)
+      .get(`/animateurs/${fakeId}`)
+      .expect(404);
+
+    expect(response.body.error).toBe('Animateur non trouvé');
+  });
+
+  it('devrait retourner une erreur 410 pour un animateur supprimé (soft delete)', async () => {
+    // Supprimer l'animateur
+    await Animateur.update(
+      { deleted_at: new Date() },
+      { where: { id: animateurId } }
+    );
+
+    const response = await request(app)
+      .get(`/animateurs/${animateurId}`)
+      .expect(410);
+
+    expect(response.body.error).toBe('Animateur supprimé');
+  });
+});
+
+describe('DELETE /animateurs/:id', () => {
+  let animateurId: string;
+
+  beforeEach(async () => {
+    // Créer un animateur de test
+    const animateur = await Animateur.create({
+      email: 'delete-test@example.com',
+      password: await bcrypt.hash('password123', 10),
+      nom: 'À Supprimer',
+      bio: 'Sera supprimé',
+    });
+    animateurId = animateur.id;
+  });
+
+  afterEach(async () => {
+    // Nettoyer après chaque test
+    await Animateur.destroy({ where: { id: animateurId }, force: true });
+  });
+
+  it('devrait effectuer un soft delete en renseignant deleted_at', async () => {
+    const response = await request(app)
+      .delete(`/animateurs/${animateurId}`)
+      .expect(200);
+
+    expect(response.body.message).toBe('Animateur supprimé avec succès');
+    expect(response.body.animateur.id).toBe(animateurId);
+    expect(response.body.animateur.deleted_at).toBeDefined();
+    expect(response.body.animateur.deleted_at).not.toBeNull();
+
+    // Vérifier que l'animateur est bien marqué comme supprimé en base de données
+    const deletedAnimateur = await Animateur.findByPk(animateurId);
+    expect(deletedAnimateur).toBeDefined();
+    expect(deletedAnimateur!.deleted_at).not.toBeNull();
+  });
+
+  it('devrait retourner une erreur 404 si l\'animateur n\'existe pas', async () => {
+    const fakeId = '550e8400-e29b-41d4-a716-446655440999';
+    const response = await request(app)
+      .delete(`/animateurs/${fakeId}`)
+      .expect(404);
+
+    expect(response.body.error).toBe('Animateur non trouvé');
+  });
+
+  it('devrait retourner une erreur 410 si l\'animateur est déjà supprimé', async () => {
+    // Supprimer l'animateur une première fois
+    await request(app)
+      .delete(`/animateurs/${animateurId}`)
+      .expect(200);
+
+    // Essayer de le supprimer à nouveau
+    const response = await request(app)
+      .delete(`/animateurs/${animateurId}`)
+      .expect(410);
+
+    expect(response.body.error).toBe('Cet animateur a déjà été supprimé');
+  });
+
+  it('devrait exclure l\'animateur supprimé de la liste GET', async () => {
+    // Supprimer l'animateur
+    await request(app)
+      .delete(`/animateurs/${animateurId}`)
+      .expect(200);
+
+    // Vérifier qu'il n'apparaît plus dans GET /animateurs
+    const listResponse = await request(app)
+      .get('/animateurs')
+      .expect(200);
+
+    const emails = listResponse.body.animateurs.map((a: any) => a.email);
+    expect(emails).not.toContain('delete-test@example.com');
+  });
+
+  it('devrait exclure l\'animateur supprimé de GET /animateurs/:id', async () => {
+    // Supprimer l'animateur
+    await request(app)
+      .delete(`/animateurs/${animateurId}`)
+      .expect(200);
+
+    // Vérifier qu'on obtient une erreur 404
+    const getResponse = await request(app)
+      .get(`/animateurs/${animateurId}`)
+      .expect(410);
+
+    expect(getResponse.body.error).toBe('Animateur supprimé');
+  });
+});
+
