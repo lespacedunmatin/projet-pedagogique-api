@@ -115,4 +115,9 @@ Le schéma suit une hiérarchie : **Animateur → Projet → Objectif → Activi
 
 ## Point d'Attention
 
-**Le projet est en phase initiale** : seuls les dépendances et la structure de base sont configurés. Suivre le plan de développement phase par phase pour l'implémentation.
+**Le projet est en phase initiale** : seuls les dépendances et la structure de base sont configurés. Suivre le plan de
+développement phase par phase pour l'implémentation.
+
+La documentation du projet doit être succincte. Ne pas inclure de longs extraits de code ou de documentation déjà
+présents dans d'autres fichiers. Se concentrer sur les informations essentielles pour comprendre et travailler avec le
+code.

@@ -7,7 +7,7 @@
 - [x] Installer les dépendances de base (express, dotenv, helmet, cors)
 - [x] Configurer les variables d'environnement (`.env`, `.env.example`)
 - [x] Mettre en place le fichier `server.js` et la configuration Express
-- [ ] Créer la structure de dossiers (`/src`, `/tests`)
+- [x] Créer la structure de dossiers (`/src`, `/tests`)
 
 ### 1.2 Base de données
 - [ ] Créer la base de données MariaDB
