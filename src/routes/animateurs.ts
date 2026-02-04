@@ -1,6 +1,8 @@
 import express, { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import Animateur from '../models/Animateur';
+import AnimateurProjet from '../models/AnimateurProjet';
+import Projet from '../models/Projet';
 
 const router = express.Router();
 
@@ -104,10 +106,12 @@ router.get('/', async (req: Request, res: Response) => {
 /**
  * GET /animateurs/:id
  * Récupère un animateur spécifique par son ID
+ * Query params: with (optionnel) - "projets" pour inclure la liste des projets
  */
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
+    const withProjets = req.query.with === 'projets';
 
     const animateur = await Animateur.findByPk(id, {
       attributes: {
@@ -126,6 +130,39 @@ router.get('/:id', async (req: Request, res: Response) => {
     if (animateur && animateur.deleted_at !== null) {
       return res.status(410).json({
         error: 'Animateur supprimé',
+      });
+    }
+
+    // Si with=projets, récupérer les projets de l'animateur
+    if (withProjets) {
+      const liaisons = await AnimateurProjet.findAll({
+        where: {
+          animateur_id: id,
+          deleted_at: null, // Exclure les liaisons supprimées
+        },
+      });
+
+      const projets = await Promise.all(
+        liaisons.map(async (liaison: any) => {
+          const projet = await Projet.findByPk(liaison.projet_id);
+
+          return {
+            projet,
+            liaison_id: liaison.id,
+            role: liaison.role,
+            created_at: liaison.created_at,
+          };
+        })
+      );
+
+      // Filtrer les projets supprimés (soft delete)
+      const activeProjectAssignments = projets.filter(
+        (p: any) => p.projet !== null && p.projet.deleted_at === null
+      );
+
+      return res.status(200).json({
+        animateur,
+        projets: activeProjectAssignments,
       });
     }
 

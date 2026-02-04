@@ -1,6 +1,8 @@
 import request from 'supertest';
 import app from '../src/server';
 import Animateur from '../src/models/Animateur';
+import Projet from '../src/models/Projet';
+import AnimateurProjet from '../src/models/AnimateurProjet';
 import bcrypt from 'bcrypt';
 import {UUID} from "node:crypto";
 
@@ -9,7 +11,6 @@ describe('POST /animateurs', () => {
 
   beforeAll(async () => {
     // S'assurer que la table Animateurs est vide avant de commencer les tests
-    console.log('Before all tests: Cleaning Animateur table');
     await Animateur.destroy({ where: {}, force: true });
   });
 
@@ -23,7 +24,6 @@ describe('POST /animateurs', () => {
       return;
     }
 
-    console.log('afterEach: Deleting animateur with id', trashBin);
     await Animateur.destroy({ where: { id: trashBin }, force: true });
   });
 
@@ -164,8 +164,6 @@ describe('GET /animateurs', () => {
       .get('/animateurs')
       .expect(200);
 
-    console.log(response.body.animateurs);
-
     expect(response.body.count).toBe(3);
     expect(response.body.animateurs).toBeInstanceOf(Array);
     expect(response.body.animateurs.length).toBe(3);
@@ -290,6 +288,147 @@ describe('GET /animateurs/:id', () => {
       .expect(410);
 
     expect(response.body.error).toBe('Animateur supprimé');
+  });
+});
+
+describe('GET /animateurs/:id?with=projets', () => {
+  let animateurId: string;
+  let projetIds: string[] = [];
+
+  beforeEach(async () => {
+    // Créer un animateur de test
+    const animateur = await Animateur.create({
+      email: 'animateur-projets@example.com',
+      password: await bcrypt.hash('password123', 10),
+      nom: 'Animateur avec Projets',
+      bio: 'Participe à plusieurs projets',
+    });
+    animateurId = animateur.id;
+
+    // Créer plusieurs projets de test
+    const projets = [
+      { nom: 'Projet Été 2026', description: 'Activités estivales' },
+      { nom: 'Projet Noël 2026', description: 'Animations festives' },
+      { nom: 'Projet Pâques 2026', description: 'Activités printanières' },
+    ];
+
+    for (const projetData of projets) {
+      const projet = await Projet.create(projetData);
+      projetIds.push(projet.id);
+
+      // Affecter l'animateur au projet avec un rôle
+      await AnimateurProjet.create({
+        animateur_id: animateurId,
+        projet_id: projet.id,
+        role: 'coordinateur',
+      });
+    }
+  });
+
+  afterEach(async () => {
+    // Nettoyer les données
+    await AnimateurProjet.destroy({ where: { animateur_id: animateurId }, force: true });
+    await Projet.destroy({ where: { id: projetIds }, force: true });
+    await Animateur.destroy({ where: { id: animateurId }, force: true });
+    projetIds = [];
+  });
+
+  it('devrait retourner l\'animateur avec ses projets quand with=projets', async () => {
+    const response = await request(app)
+      .get(`/animateurs/${animateurId}?with=projets`)
+      .expect(200);
+
+    expect(response.body.animateur).toBeDefined();
+    expect(response.body.animateur.id).toBe(animateurId);
+    expect(response.body.projets).toBeDefined();
+    expect(response.body.projets).toBeInstanceOf(Array);
+    expect(response.body.projets.length).toBe(3);
+
+    // Vérifier que les projets contiennent les bonnes données
+    const noms = response.body.projets.map((p: any) => p.projet.nom);
+    expect(noms).toContain('Projet Été 2026');
+    expect(noms).toContain('Projet Noël 2026');
+    expect(noms).toContain('Projet Pâques 2026');
+
+    // Vérifier que les rôles sont inclus
+    response.body.projets.forEach((p: any) => {
+      expect(p.role).toBe('coordinateur');
+      expect(p.liaison_id).toBeDefined();
+      expect(p.created_at).toBeDefined();
+    });
+  });
+
+  it('devrait retourner un tableau vide de projets si l\'animateur n\'en a aucun', async () => {
+    // Créer un nouvel animateur sans projets
+    const animateurSansProjets = await Animateur.create({
+      email: 'sans-projets@example.com',
+      password: await bcrypt.hash('password123', 10),
+      nom: 'Animateur sans Projets',
+    });
+
+    const response = await request(app)
+      .get(`/animateurs/${animateurSansProjets.id}?with=projets`)
+      .expect(200);
+
+    expect(response.body.animateur).toBeDefined();
+    expect(response.body.projets).toEqual([]);
+
+    // Nettoyer
+    await Animateur.destroy({ where: { id: animateurSansProjets.id }, force: true });
+  });
+
+  it('devrait exclure les projets supprimés (soft delete)', async () => {
+    // Supprimer le premier projet
+    await Projet.update(
+      { deleted_at: new Date() },
+      { where: { id: projetIds[0] } }
+    );
+
+    const response = await request(app)
+      .get(`/animateurs/${animateurId}?with=projets`)
+      .expect(200);
+
+    expect(response.body.projets.length).toBe(2);
+
+    // Vérifier que le projet supprimé n'est pas dans la liste
+    const noms = response.body.projets.map((p: any) => p.projet.nom);
+    expect(noms).not.toContain('Projet Été 2026');
+  });
+
+  it('devrait exclure les liaisons supprimées (soft delete)', async () => {
+    // Supprimer la liaison avec le premier projet (soft delete)
+    await AnimateurProjet.update(
+      { deleted_at: new Date() },
+      { where: { animateur_id: animateurId, projet_id: projetIds[0] } }
+    );
+
+    const response = await request(app)
+      .get(`/animateurs/${animateurId}?with=projets`)
+      .expect(200);
+
+    expect(response.body.projets.length).toBe(2);
+
+    // Vérifier que le projet sans liaison n'est pas dans la liste
+    const noms = response.body.projets.map((p: any) => p.projet.nom);
+    expect(noms).not.toContain('Projet Été 2026');
+  });
+
+  it('devrait retourner seulement l\'animateur sans projets si with n\'est pas "projets"', async () => {
+    const response = await request(app)
+      .get(`/animateurs/${animateurId}?with=autre`)
+      .expect(200);
+
+    expect(response.body.animateur).toBeDefined();
+    expect(response.body.projets).toBeUndefined();
+  });
+
+  it('devrait retourner seulement l\'animateur sans projets si with n\'est pas fourni', async () => {
+    const response = await request(app)
+      .get(`/animateurs/${animateurId}`)
+      .expect(200);
+
+    expect(response.body.animateur).toBeDefined();
+    expect(response.body.projets).toBeUndefined();
   });
 });
 
