@@ -19,8 +19,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "tsc && npm start",
-    "test": "jest",
-    "test:watch": "jest --watch",
+    "test": "jest --runInBand",
+    "test:watch": "jest --watch --runInBand",
     "db:init": "tsc && node dist/database/init.js"
   },
   "devDependencies": {

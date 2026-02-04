@@ -10,7 +10,7 @@ describe('POST /animateurs', () => {
   beforeAll(async () => {
     // S'assurer que la table Animateurs est vide avant de commencer les tests
     console.log('Before all tests: Cleaning Animateur table');
-    await Animateur.destroy({ where: {}, truncate: true });
+    await Animateur.destroy({ where: {}, force: true });
   });
 
   beforeEach(async () => {
@@ -24,10 +24,10 @@ describe('POST /animateurs', () => {
     }
 
     console.log('afterEach: Deleting animateur with id', trashBin);
-    await Animateur.destroy({ where: {id: trashBin}, truncate: true });
+    await Animateur.destroy({ where: { id: trashBin }, force: true });
   });
 
-  fit('devrait créer un nouvel animateur avec un mot de passe chiffré', async () => {
+  it('devrait créer un nouvel animateur avec un mot de passe chiffré', async () => {
     const animateurData = {
       email: 'test@example.com',
       password: 'password123',
@@ -118,7 +118,7 @@ describe('GET /animateurs', () => {
 
   beforeAll(async () => {
     // S'assurer que la table Animateurs est vide avant de commencer les tests
-    await Animateur.destroy({ where: {}, truncate: true });
+    await Animateur.destroy({ where: {}, force: true });
   });
 
   beforeEach(async () => {
@@ -164,6 +164,8 @@ describe('GET /animateurs', () => {
       .get('/animateurs')
       .expect(200);
 
+    console.log(response.body.animateurs);
+
     expect(response.body.count).toBe(3);
     expect(response.body.animateurs).toBeInstanceOf(Array);
     expect(response.body.animateurs.length).toBe(3);
@@ -185,6 +187,8 @@ describe('GET /animateurs', () => {
       .get('/animateurs?id_projet=')
       .expect(200);
 
+    console.log(response.body.animateurs);
+
     expect(response.body.count).toBe(3);
     expect(response.body.animateurs.length).toBe(3);
   });
@@ -200,7 +204,7 @@ describe('GET /animateurs', () => {
 
   it('devrait retourner un tableau vide si aucun animateur n\'existe', async () => {
     // Supprimer tous les animateurs
-    await Animateur.destroy({ where: { id: createdAnimateursUUID } });
+    await Animateur.destroy({ where: {}, force: true });
     createdAnimateursUUID = [];
 
     const response = await request(app)
@@ -221,6 +225,8 @@ describe('GET /animateurs', () => {
     const response = await request(app)
       .get('/animateurs')
       .expect(200);
+
+    console.log(response.body.animateurs);
 
     expect(response.body.count).toBe(2);
     expect(response.body.animateurs.length).toBe(2);

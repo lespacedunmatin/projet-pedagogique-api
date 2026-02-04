@@ -13,8 +13,6 @@ router.post('/', async (req: Request, res: Response) => {
   try {
     const { email, password, nom, bio } = req.body;
 
-    console.log(email, password, nom);
-
     // Validation des champs obligatoires
     if (!email || !password || !nom) {
       return res.status(400).json({
