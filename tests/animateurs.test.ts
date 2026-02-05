@@ -185,8 +185,6 @@ describe('GET /animateurs', () => {
       .get('/animateurs?id_projet=')
       .expect(200);
 
-    console.log(response.body.animateurs);
-
     expect(response.body.count).toBe(3);
     expect(response.body.animateurs.length).toBe(3);
   });
@@ -223,8 +221,6 @@ describe('GET /animateurs', () => {
     const response = await request(app)
       .get('/animateurs')
       .expect(200);
-
-    console.log(response.body.animateurs);
 
     expect(response.body.count).toBe(2);
     expect(response.body.animateurs.length).toBe(2);

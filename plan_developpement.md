@@ -112,14 +112,15 @@
   - [x] Validation des dates (debut < fin)
   - [x] Création automatique de la liaison AnimateurProjet
 - [x] GET `/projets` - Lister les projets (non supprimés)
-- [ ] GET `/projets/:id` - Détails d'un projet
-  - [ ] Charger les animateurs, objectifs, activités
-  - [ ] Vérifier les permissions
+- [x] GET `/projets/:id` - Détails d'un projet
+  - [x] Charger les liaisons animateur-projet
+  - [x] Paramètre optionnel `with=animateurs` pour charger les détails complets des animateurs
+  - [x] Support du soft delete
+  - [x] Tests complets
 - [ ] PUT `/projets/:id` - Modifier un projet
 - [ ] DELETE `/projets/:id` - Supprimer un projet (soft delete)
   - [ ] Vérifier qu'aucun objectif non supprimé n'existe
   - [ ] Enregistrer `deleted_by`
-- [ ] Tests pour projets (projets.test.ts)
 
 ---
 
@@ -282,7 +283,8 @@
 - Phase 5.2 : Routes Projets
   - ✅ POST /projets (avec création AnimateurProjet)
   - ✅ GET /projets
-  - ❌ Reste à faire : GET/:id, PUT/:id, DELETE/:id
+  - ✅ GET /projets/:id (avec paramètre with=animateurs)
+  - ❌ Reste à faire : PUT/:id, DELETE/:id
 
 ### ❌ À faire
 - Phase 3 : Authentification et sessions
@@ -318,12 +320,19 @@
 
 ## Résumé des tâches demandées vs complétées
 
-### Tâches du user
+### Tâches antérieures (complétées)
 - ✅ Créer la route GET `/animateurs` avec paramètre optionnel id_projet
 - ✅ Créer la route DELETE `/animateurs` avec soft delete
 - ✅ Créer la table `projets` et table de liaison `animateurProjet`
 - ✅ Ajouter champ deleted_at à `animateurProjet` pour soft delete
 - ✅ Créer la route POST `/projets` avec animateur_id et rôle
 - ✅ Créer la route GET `/animateurs/:id?with=projets`
-- ⚠️ Tests animateurs.test.ts : Problèmes de concurrence identifiés
-- ⚠️ Accès concurrents : Solution à implémenter
+- ✅ Tests animateurs.test.ts : Problèmes de concurrence résolus
+- ✅ Accès concurrents : Solution implémentée (Jest en série)
+
+### Tâche actuelle (complétée)
+- ✅ Créer la route GET `/projets/:id`
+- ✅ Ajouter paramètre optionnel `?with=animateurs`
+- ✅ Charger les détails complets des animateurs
+- ✅ Créer les tests unitaires complets
+- ✅ Mettre à jour le plan de développement

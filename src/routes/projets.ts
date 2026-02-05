@@ -105,11 +105,13 @@ router.get('/', async (req: Request, res: Response) => {
 
 /**
  * GET /projets/:id
- * Récupère les détails d'un projet spécifique
+ * Récupère les détails d'un projet spécifique avec les animateurs associés
+ * Query params: with (optionnel) - "animateurs" pour inclure les détails complets des animateurs
  */
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
+    const withAnimateurs = req.query.with === 'animateurs';
 
     const projet = await Projet.findByPk(id);
 
@@ -120,17 +122,44 @@ router.get('/:id', async (req: Request, res: Response) => {
       });
     }
 
-    // Récupérer les animateurs du projet
-    const animateurs = await AnimateurProjet.findAll({
+    // Récupérer les liaisons animateur-projet non supprimées
+    const liaisons = await AnimateurProjet.findAll({
       where: {
         projet_id: id,
         deleted_at: null,
       },
     });
 
+    // Si with=animateurs, charger les données complètes des animateurs
+    let animateursList: any[] = liaisons;
+
+    if (withAnimateurs) {
+      animateursList = await Promise.all(
+        liaisons.map(async (liaison: any) => {
+          const animateur = await Animateur.findByPk(liaison.animateur_id, {
+            attributes: {
+              exclude: ['password'], // Ne pas retourner le mot de passe
+            },
+          });
+
+          return {
+            liaison_id: liaison.id,
+            role: liaison.role,
+            created_at: liaison.created_at,
+            animateur,
+          };
+        })
+      );
+
+      // Filtrer les animateurs supprimés (soft delete)
+      animateursList = animateursList.filter(
+        (item: any) => item.animateur !== null && item.animateur.deleted_at === null
+      );
+    }
+
     return res.status(200).json({
       projet,
-      animateurs,
+      animateurs: animateursList,
     });
   } catch (error) {
     console.error('Erreur lors de la récupération du projet:', error);

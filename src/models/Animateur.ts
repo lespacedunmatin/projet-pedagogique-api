@@ -75,3 +75,4 @@ Animateur.init(
 );
 
 export default Animateur;
+export type { AnimateurAttributes, AnimateurCreationAttributes };
