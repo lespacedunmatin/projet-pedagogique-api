@@ -1,11 +1,15 @@
 meta {
   name: Récupérer un animateur
   type: http
-  seq: 5
+  seq: 7
 }
 
 get {
-  url: http://localhost:3000/animateurs/92d6f625-146b-4569-b1da-ed25c0495a82
+  url: http://localhost:3000/animateurs/be0265b4-b3db-4cc8-b02b-37a3b58584fb
   body: none
   auth: inherit
+}
+
+params:query {
+  ~with: projets
 }

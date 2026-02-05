@@ -41,10 +41,13 @@ SELECT * FROM animateurs;
 
 ## 🎯 Prochaines étapes
 
-1. ✅ Tester avec `npm run db:init`
-2. ➡️ Phase 2 : Créer autres modèles
-3. ➡️ Phase 3 : Implémenter authentification
-4. ➡️ Phase 4 : Développer API
+1. ✅ Phase 1-2 : Infrastructure et modèles
+2. ✅ Phase 5.1 : Routes Animateurs complètes
+3. ⚠️ Phase 5.2 : Routes Projets (POST, GET, GET/:id ✅ | Reste : PUT, DELETE)
+4. ➡️ Phase 5.3 : Gestion animateurs par projet
+5. ➡️ Phase 6 : Système d'invitations
+6. ➡️ Phase 3 : Authentification et sessions
+7. ➡️ Phase 7-11 : Objectifs, activités, corbeille, sécurité, doc
 
 ---
 

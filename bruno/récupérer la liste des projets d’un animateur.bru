@@ -1,0 +1,20 @@
+meta {
+  name: récupérer la liste des projets d’un animateur
+  type: http
+  seq: 8
+}
+
+get {
+  url: http://localhost:3000/animateurs/6f9e5d8a-8592-4f17-8be2-59b5980a9f9a?with=projets
+  body: none
+  auth: inherit
+}
+
+params:query {
+  with: projets
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

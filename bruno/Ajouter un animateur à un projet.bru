@@ -1,0 +1,23 @@
+meta {
+  name: Ajouter un animateur à un projet
+  type: http
+  seq: 6
+}
+
+post {
+  url: http://localhost:3000/projets/1856a1cb-c507-4833-8241-e3c06ea3c14e/animateurs
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email": "bp2@example.com",
+    "role": "assistant"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -127,7 +127,14 @@
 ## Phase 5.3 : Gestion supplémentaire des animateurs par projet
 
 ### 5.3 Routes AnimateurProjet
-- [ ] POST `/projets/:projet_id/animateurs` - Ajouter un animateur à un projet
+- [x] POST `/projets/:id/animateurs` - Ajouter un animateur à un projet via email
+  - [x] Validation de l'email (obligatoire)
+  - [x] Vérification que le projet existe et n'est pas supprimé
+  - [x] Récupération de l'animateur par email
+  - [x] Vérification que l'animateur n'est pas déjà membre du projet
+  - [x] Création de la liaison avec rôle optionnel
+  - [x] Tests complets (ajout, doublons, erreurs 404, 409)
+  - [x] Intégration aux tests projets.test.ts
 - [ ] GET `/projets/:projet_id/animateurs` - Lister les animateurs d'un projet
 - [ ] PUT `/projets/:projet_id/animateurs/:animateur_id` - Modifier le rôle
 - [ ] DELETE `/projets/:projet_id/animateurs/:animateur_id` - Retirer un animateur (soft delete)
@@ -335,4 +342,7 @@
 - ✅ Ajouter paramètre optionnel `?with=animateurs`
 - ✅ Charger les détails complets des animateurs
 - ✅ Créer les tests unitaires complets
+- ✅ Créer la route POST `/projets/:id/animateurs`
+- ✅ Ajouter un animateur à un projet via email
+- ✅ Intégrer les tests pour cette route
 - ✅ Mettre à jour le plan de développement

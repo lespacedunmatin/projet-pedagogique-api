@@ -169,4 +169,80 @@ router.get('/:id', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * POST /projets/:id/animateurs
+ * Ajoute un animateur à un projet via son email
+ * Body: {
+ *   email: string (email de l'animateur à ajouter),
+ *   role?: string (rôle optionnel de l'animateur dans le projet)
+ * }
+ */
+router.post('/:id/animateurs', async (req: Request, res: Response) => {
+  try {
+    const projetId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const { email, role } = req.body;
+
+    // Validation des paramètres
+    if (!email) {
+      return res.status(400).json({ error: 'L\'email est obligatoire' });
+    }
+
+    // Vérifier que le projet existe et n'est pas supprimé
+    const projet = await Projet.findOne({
+      where: { id: projetId, deleted_at: null },
+    });
+
+    if (!projet) {
+      return res.status(404).json({ error: 'Projet non trouvé' });
+    }
+
+    // Trouver l'animateur par email
+    const animateur = await Animateur.findOne({
+      where: { email, deleted_at: null },
+    });
+
+    if (!animateur) {
+      return res.status(404).json({ error: 'Animateur non trouvé' });
+    }
+
+    // Vérifier que l'animateur n'est pas déjà affecté au projet
+    const liaisonExistante = await AnimateurProjet.findOne({
+      where: {
+        animateur_id: animateur.id,
+        projet_id: projetId,
+        deleted_at: null,
+      },
+    });
+
+    if (liaisonExistante) {
+      return res.status(409).json({
+        error: 'Cet animateur est déjà affecté à ce projet',
+      });
+    }
+
+    // Créer la liaison
+    const liaison = await AnimateurProjet.create({
+      animateur_id: animateur.id,
+      projet_id: projetId,
+      role: role || undefined,
+    });
+
+    return res.status(201).json({
+      message: 'Animateur ajouté au projet avec succès',
+      animateur_affecte: {
+        id: liaison.id,
+        animateur_id: liaison.animateur_id,
+        projet_id: liaison.projet_id,
+        role: liaison.role,
+        created_at: liaison.created_at,
+      },
+    });
+  } catch (error) {
+    console.error('Erreur lors de l\'ajout d\'animateur au projet :', error);
+    return res.status(500).json({
+      error: 'Erreur serveur lors de l\'ajout de l\'animateur',
+    });
+  }
+});
+
 export default router;

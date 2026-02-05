@@ -1,0 +1,27 @@
+meta {
+  name: créer un nouveau projet
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://localhost:3000/projets
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "nom": "Projet Été 2026",
+    "description": "Activités estivales",
+    "date_debut": "2026-06-01",
+    "date_fin": "2026-08-31",
+    "animateur_id": "be0265b4-b3db-4cc8-b02b-37a3b58584fb",
+    "role": "coordinateur"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
