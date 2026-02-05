@@ -172,11 +172,14 @@
 ## Phase 7 : Objectifs pédagogiques (semaine 5)
 
 ### 7.1 POST `/projets/:projet_id/objectifs` - Créer
-- [ ] Créer le contrôleur `objectifController.create()`
-- [ ] Vérifier les permissions
-- [ ] Validation du texte (non vide)
-- [ ] Créer la route
-- [ ] Ajouter les tests
+- [x] Créer le contrôleur `objectifController.create()`
+- [x] Validation du texte (non vide)
+- [x] Validation que le projet existe et n'est pas supprimé
+- [x] Validation que l'animateur existe et n'est pas supprimé
+- [x] Validation que l'animateur est membre du projet
+- [x] Enregistrer `created_by` avec l'ID de l'animateur
+- [x] Créer la route
+- [x] Ajouter les tests (8 tests: succès, ordre par défaut, texte manquant, animateur_id manquant, projet inexistant, animateur inexistant, animateur non-membre, animateur/projet supprimé)
 
 ### 7.2 PUT `/projets/:projet_id/objectifs/:id` - Modifier
 - [ ] Créer le contrôleur `objectifController.update()`
@@ -296,10 +299,13 @@
   - ✅ GET /projets
   - ✅ GET /projets/:id (avec paramètre with=animateurs)
   - ❌ Reste à faire : PUT/:id, DELETE/:id
-- Phase 5.3 : Routes AnimateurProjet (EN COURS)
+- Phase 5.3 : Routes AnimateurProjet
   - ✅ POST /projets/:id/animateurs
   - ✅ GET /projets/:projet_id/animateurs
   - ❌ Reste à faire : PUT/:animateur_id, DELETE/:animateur_id
+- Phase 7 : Objectifs pédagogiques
+  - ✅ POST /projets/:projet_id/objectifs (avec tests)
+  - ❌ Reste à faire : PUT/:id, DELETE/:id, GET (liste et détails)
 
 ### ❌ À faire
 - Phase 3 : Authentification et sessions
@@ -360,3 +366,8 @@
 - ✅ Charger les détails complets (sans mot de passe)
 - ✅ Créer 6 tests complets (liste simple, avec détails, vide, inexistant, supprimé)
 - ✅ Mettre à jour le plan de développement
+- ✅ Créer la route POST `/projets/:projet_id/objectifs`
+- ✅ Créer un nouvel objectif pour un projet
+- ✅ Ajouter les validations nécessaires (projet, animateur, appartenance)
+- ✅ Enregistrer le créateur avec `created_by`
+- ✅ Créer 8 tests complets (succès, ordre par défaut, champs manquants, erreurs 404/403)
