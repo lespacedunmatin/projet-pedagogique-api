@@ -33,14 +33,14 @@
 - [x] Modèle `Animateur` (avec soft delete - deleted_at)
 - [x] Modèle `Projet` (avec soft delete - deleted_at)
 - [x] Modèle `AnimateurProjet` (liaison, avec soft delete - deleted_at)
-- [ ] Modèle `Objectif`
-- [ ] Modèle `Activite`
-- [ ] Modèle `ActiviteObjectif` (liaison)
-- [ ] Modèle `Invitation`
+- [x] Modèle `Objectif` (avec soft delete - deleted_at)
+- [ ] Modèle `Activite` (avec soft delete - deleted_at)
+- [ ] Modèle `ActiviteObjectif` (liaison, avec soft delete - deleted_at)
+- [ ] Modèle `Invitation` (avec soft delete - deleted_at)
 
 ### 2.2 Configurer les associations
 - [x] Animateur ↔ Projet (many-to-many via AnimateurProjet) - Configurée en base de données
-- [ ] Projet → Objectif (one-to-many)
+- [x] Projet → Objectif (one-to-many)
 - [ ] Projet → Activite (one-to-many)
 - [ ] Objectif ↔ Activite (many-to-many via ActiviteObjectif)
 - [ ] Animateur → Invitation (one-to-many pour `invited_by`)
@@ -49,7 +49,7 @@
 - [x] Migration pour la table `animateurs`
 - [x] Migration pour la table `projets`
 - [x] Migration pour la table `animateurs_projets`
-- [ ] Migration pour la table `objectifs`
+- [x] Migration pour la table `objectifs`
 - [ ] Migration pour la table `activites`
 - [ ] Migration pour la table `activites_objectifs`
 - [ ] Migration pour la table `invitations`
@@ -280,8 +280,8 @@
 
 ### ✅ Complété
 - Phase 1 : Infrastructure et configuration
-- Phase 2 : Modèles de données (Animateur, Projet, AnimateurProjet)
-- Phase 2.2 : Association Animateur-Projet
+- Phase 2 : Modèles de données (Animateur, Projet, AnimateurProjet, Objectif)
+- Phase 2.2 : Associations Sequelize (Animateur-Projet, Projet-Objectif)
 - Phase 3.2 : Sécurité des mots de passe avec bcrypt
 - Phase 5.1 : Routes complètes pour Animateurs
   - POST /animateurs

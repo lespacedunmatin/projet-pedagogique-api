@@ -1,11 +1,15 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import { setupAssociations } from './database/associations';
 import animateursRouter from './routes/animateurs';
 import projetsRouter from './routes/projets';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Configurer les associations Sequelize
+setupAssociations();
 
 // Middleware
 app.use(helmet());

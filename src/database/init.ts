@@ -2,6 +2,8 @@ import sequelize from '../database/config';
 import Animateur from '../models/Animateur';
 import Projet from '../models/Projet';
 import AnimateurProjet from '../models/AnimateurProjet';
+import Objectif from '../models/Objectif';
+import { setupAssociations } from './associations';
 import * as crypto from 'crypto';
 import { Sequelize } from 'sequelize';
 
@@ -91,6 +93,10 @@ async function initializeDatabase() {
     console.log('Connexion à la base de données…');
     await sequelize.authenticate();
     console.log('✓ Connexion réussie à la base de données');
+
+    console.log('Configuration des associations…');
+    setupAssociations();
+    console.log('✓ Associations configurées');
 
     console.log('Synchronisation des modèles…');
     await sequelize.sync({ alter: true });
