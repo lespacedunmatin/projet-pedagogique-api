@@ -648,3 +648,149 @@ describe('POST /projets/:id/animateurs', () => {
   });
 });
 
+describe('GET /projets/:projet_id/animateurs', () => {
+  let projetId: string;
+  let animateur1Id: string;
+  let animateur2Id: string;
+
+  beforeEach(async () => {
+    // Créer deux animateurs
+    const animateur1 = await Animateur.create({
+      email: `test1-${Date.now()}@example.com`,
+      password: await bcrypt.hash('password123', 10),
+      nom: 'Animateur 1',
+    });
+    animateur1Id = animateur1.id;
+
+    const animateur2 = await Animateur.create({
+      email: `test2-${Date.now()}@example.com`,
+      password: await bcrypt.hash('password456', 10),
+      nom: 'Animateur 2',
+    });
+    animateur2Id = animateur2.id;
+
+    // Créer un projet
+    const projet = await Projet.create({
+      nom: 'Projet Test',
+    });
+    projetId = projet.id;
+
+    // Ajouter les deux animateurs au projet
+    await AnimateurProjet.create({
+      animateur_id: animateur1Id,
+      projet_id: projetId,
+      role: 'coordinateur',
+    });
+
+    await AnimateurProjet.create({
+      animateur_id: animateur2Id,
+      projet_id: projetId,
+      role: 'assistant',
+    });
+  });
+
+  afterEach(async () => {
+    // Nettoyer
+    await AnimateurProjet.destroy({ where: {} });
+    await Projet.destroy({ where: { id: projetId }, force: true });
+    await Animateur.destroy({ where: { id: animateur1Id }, force: true });
+    await Animateur.destroy({ where: { id: animateur2Id }, force: true });
+  });
+
+  it('devrait retourner la liste des animateurs du projet sans détails', async () => {
+    const response = await request(app)
+      .get(`/projets/${projetId}/animateurs`)
+      .expect(200);
+
+    expect(response.body.projet_id).toBe(projetId);
+    expect(response.body.count).toBe(2);
+    expect(response.body.animateurs).toBeInstanceOf(Array);
+    expect(response.body.animateurs.length).toBe(2);
+
+    // Vérifier les données retournées
+    const anim1 = response.body.animateurs.find((a: any) => a.animateur_id === animateur1Id);
+    expect(anim1).toBeDefined();
+    expect(anim1.role).toBe('coordinateur');
+
+    const anim2 = response.body.animateurs.find((a: any) => a.animateur_id === animateur2Id);
+    expect(anim2).toBeDefined();
+    expect(anim2.role).toBe('assistant');
+  });
+
+  it('devrait retourner une liste vide si aucun animateur', async () => {
+    // Créer un nouveau projet sans animateurs
+    const projetVide = await Projet.create({
+      nom: 'Projet Vide',
+    });
+
+    const response = await request(app)
+      .get(`/projets/${projetVide.id}/animateurs`)
+      .expect(200);
+
+    expect(response.body.projet_id).toBe(projetVide.id);
+    expect(response.body.count).toBe(0);
+    expect(response.body.animateurs).toEqual([]);
+
+    // Nettoyer
+    await Projet.destroy({ where: { id: projetVide.id }, force: true });
+  });
+
+  it('devrait retourner 404 si le projet n\'existe pas', async () => {
+    const response = await request(app)
+      .get(`/projets/550e8400-e29b-41d4-a716-446655440999/animateurs`)
+      .expect(404);
+
+    expect(response.body.error).toBe('Projet non trouvé');
+  });
+
+  it('devrait retourner 404 si le projet est supprimé', async () => {
+    // Supprimer le projet
+    await Projet.update(
+      { deleted_at: new Date() },
+      { where: { id: projetId } }
+    );
+
+    const response = await request(app)
+      .get(`/projets/${projetId}/animateurs`)
+      .expect(404);
+
+    expect(response.body.error).toBe('Projet non trouvé');
+  });
+
+  it('ne devrait pas retourner les animateurs supprimés', async () => {
+    // Supprimer un animateur (soft delete)
+    await Animateur.update(
+      { deleted_at: new Date() },
+      { where: { id: animateur1Id } }
+    );
+
+    const response = await request(app)
+      .get(`/projets/${projetId}/animateurs?with=details`)
+      .expect(200);
+
+    // Devrait retourner seulement animateur2
+    expect(response.body.count).toBe(1);
+    expect(response.body.animateurs.length).toBe(1);
+    expect(response.body.animateurs[0].animateur_id).toBe(animateur2Id);
+  });
+
+  it('ne devrait pas retourner les liaisons supprimées', async () => {
+    // Supprimer la liaison (soft delete)
+    const liaison = await AnimateurProjet.findOne({
+      where: { animateur_id: animateur1Id, projet_id: projetId },
+    });
+
+    await AnimateurProjet.update(
+      { deleted_at: new Date() },
+      { where: { id: liaison!.id } }
+    );
+
+    const response = await request(app)
+      .get(`/projets/${projetId}/animateurs`)
+      .expect(200);
+
+    // Devrait retourner seulement animateur2
+    expect(response.body.count).toBe(1);
+    expect(response.body.animateurs[0].animateur_id).toBe(animateur2Id);
+  });
+});

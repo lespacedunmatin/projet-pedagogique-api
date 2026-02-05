@@ -245,4 +245,67 @@ router.post('/:id/animateurs', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * GET /projets/:projet_id/animateurs
+ * Récupère la liste des animateurs d'un projet
+ * Query params: with (optionnel) - "details" pour inclure les détails complets des animateurs
+ */
+router.get('/:projet_id/animateurs', async (req: Request, res: Response) => {
+  try {
+    const projetId = Array.isArray(req.params.projet_id) ? req.params.projet_id[0] : req.params.projet_id;
+
+    // Vérifier que le projet existe et n'est pas supprimé
+    const projet = await Projet.findOne({
+      where: { id: projetId, deleted_at: null },
+    });
+
+    if (!projet) {
+      return res.status(404).json({ error: 'Projet non trouvé' });
+    }
+
+    // Récupérer les liaisons animateur-projet non supprimées
+    const liaisons = await AnimateurProjet.findAll({
+      where: {
+        projet_id: projetId,
+        deleted_at: null,
+      },
+      order: [['created_at', 'ASC']],
+    });
+
+    // Si with=details, charger les données complètes des animateurs
+    let result: any[] = liaisons;
+
+    result = await Promise.all(
+      liaisons.map(async (liaison: any) => {
+        const animateur = await Animateur.findByPk(liaison.animateur_id, {
+          attributes: {
+            exclude: ['password'],
+          },
+        });
+
+        return {
+          liaison_id: liaison.id,
+          role: liaison.role,
+          created_at: liaison.created_at,
+          animateur: animateur && animateur.deleted_at === null ? animateur : null,
+        };
+      })
+    );
+
+    // Filtrer les animateurs supprimés
+    result = result.filter((item: any) => item.animateur !== null);
+
+    return res.status(200).json({
+      projet_id: projetId,
+      count: result.length,
+      animateurs: result,
+    });
+  } catch (error) {
+    console.error('Erreur lors de la récupération des animateurs du projet:', error);
+    return res.status(500).json({
+      error: 'Erreur serveur lors de la récupération des animateurs',
+    });
+  }
+});
+
 export default router;

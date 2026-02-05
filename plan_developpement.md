@@ -135,7 +135,11 @@
   - [x] Création de la liaison avec rôle optionnel
   - [x] Tests complets (ajout, doublons, erreurs 404, 409)
   - [x] Intégration aux tests projets.test.ts
-- [ ] GET `/projets/:projet_id/animateurs` - Lister les animateurs d'un projet
+- [x] GET `/projets/:projet_id/animateurs` - Lister les animateurs d'un projet
+  - [x] Récupération de la liste des animateurs non supprimés
+  - [x] Support du soft delete (filtrer les animateurs supprimés)
+  - [x] Tests complets (liste simple, avec détails, vide, erreurs 404)
+  - [x] Tri par date de création
 - [ ] PUT `/projets/:projet_id/animateurs/:animateur_id` - Modifier le rôle
 - [ ] DELETE `/projets/:projet_id/animateurs/:animateur_id` - Retirer un animateur (soft delete)
 
@@ -292,11 +296,16 @@
   - ✅ GET /projets
   - ✅ GET /projets/:id (avec paramètre with=animateurs)
   - ❌ Reste à faire : PUT/:id, DELETE/:id
+- Phase 5.3 : Routes AnimateurProjet (EN COURS)
+  - ✅ POST /projets/:id/animateurs
+  - ✅ GET /projets/:projet_id/animateurs
+  - ❌ Reste à faire : PUT/:animateur_id, DELETE/:animateur_id
 
 ### ❌ À faire
 - Phase 3 : Authentification et sessions
 - Phase 4 : Validations globales
-- Phase 5.3 : Gestion des animateurs par projet
+- Phase 5.2 : Routes Projets (PUT/:id, DELETE/:id)
+- Phase 5.3 : Routes AnimateurProjet (PUT/:animateur_id, DELETE/:animateur_id)
 - Phase 6 : Système d'invitations
 - Phases 7-11 : Objectifs, activités, corbeille, sécurité, documentation
 
@@ -345,4 +354,9 @@
 - ✅ Créer la route POST `/projets/:id/animateurs`
 - ✅ Ajouter un animateur à un projet via email
 - ✅ Intégrer les tests pour cette route
+- ✅ Créer la route GET `/projets/:projet_id/animateurs`
+- ✅ Retourner la liste des animateurs d'un projet
+- ✅ Ajouter paramètre optionnel `?with=details`
+- ✅ Charger les détails complets (sans mot de passe)
+- ✅ Créer 6 tests complets (liste simple, avec détails, vide, inexistant, supprimé)
 - ✅ Mettre à jour le plan de développement
