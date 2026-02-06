@@ -89,4 +89,81 @@ router.post('/:projet_id/objectifs', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * GET /projets/:projet_id/objectifs
+ * Récupère la liste des objectifs d'un projet
+ * Query params: with (optionnel) - "details" pour inclure les détails complets des créateurs
+ */
+router.get('/:projet_id/objectifs', async (req: Request, res: Response) => {
+  try {
+    const projetId = Array.isArray(req.params.projet_id) ? req.params.projet_id[0] : req.params.projet_id;
+    const withDetails = req.query.with === 'details';
+
+    // Vérifier que le projet existe et n'est pas supprimé
+    const projet = await Projet.findOne({
+      where: { id: projetId, deleted_at: null },
+    });
+
+    if (!projet) {
+      return res.status(404).json({ error: 'Projet non trouvé' });
+    }
+
+    // Récupérer les objectifs non supprimés
+    const objectifs = await Objectif.findAll({
+      where: {
+        projet_id: projetId,
+        deleted_at: null,
+      },
+      order: [['ordre', 'ASC'], ['created_at', 'ASC']],
+    });
+
+    // Si with=details, charger les données complètes des créateurs
+    let result: any[] = objectifs;
+
+    if (withDetails) {
+      result = await Promise.all(
+        objectifs.map(async (objectif: any) => {
+          const createdByAnimateur = await Animateur.findByPk(objectif.created_by, {
+            attributes: {
+              exclude: ['password'],
+            },
+          });
+
+          const modifiedByAnimateur = objectif.modified_by
+            ? await Animateur.findByPk(objectif.modified_by, {
+                attributes: {
+                  exclude: ['password'],
+                },
+              })
+            : null;
+
+          return {
+            id: objectif.id,
+            projet_id: objectif.projet_id,
+            texte: objectif.texte,
+            ordre: objectif.ordre,
+            created_by: objectif.created_by,
+            modified_by: objectif.modified_by,
+            created_at: objectif.created_at,
+            updated_at: objectif.updated_at,
+            createdByAnimateur: createdByAnimateur || null,
+            modifiedByAnimateur: modifiedByAnimateur || null,
+          };
+        })
+      );
+    }
+
+    return res.status(200).json({
+      projet_id: projetId,
+      count: result.length,
+      objectifs: result,
+    });
+  } catch (error) {
+    console.error('Erreur lors de la récupération des objectifs:', error);
+    return res.status(500).json({
+      error: 'Erreur serveur lors de la récupération des objectifs',
+    });
+  }
+});
+
 export default router;

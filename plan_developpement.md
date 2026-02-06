@@ -181,13 +181,23 @@
 - [x] Créer la route
 - [x] Ajouter les tests (8 tests: succès, ordre par défaut, texte manquant, animateur_id manquant, projet inexistant, animateur inexistant, animateur non-membre, animateur/projet supprimé)
 
-### 7.2 PUT `/projets/:projet_id/objectifs/:id` - Modifier
+### 7.2 GET `/projets/:projet_id/objectifs` - Lister
+- [x] Créer le contrôleur pour lister les objectifs
+- [x] Filtrer les objectifs non supprimés d'un projet (deleted_at = null)
+- [x] Trier par ordre puis date de création
+- [x] Paramètre optionnel `with=details` pour charger les créateurs/modificateurs
+- [x] Vérifier que le projet existe et n'est pas supprimé
+- [x] Conserver les objectifs dont le créateur a été supprimé (retourner createdByAnimateur = null)
+- [x] Créer la route
+- [x] Ajouter les tests (7 tests: liste complète, liste vide, projet inexistant, projet supprimé, avec détails, créateurs supprimés, tri)
+
+### 7.3 PUT `/projets/:projet_id/objectifs/:id` - Modifier
 - [ ] Créer le contrôleur `objectifController.update()`
 - [ ] Vérifier les permissions
 - [ ] Créer la route
 - [ ] Ajouter les tests
 
-### 7.3 DELETE `/projets/:projet_id/objectifs/:id` - Supprimer
+### 7.4 DELETE `/projets/:projet_id/objectifs/:id` - Supprimer
 - [ ] Créer le contrôleur `objectifController.delete()`
 - [ ] Vérifier qu'aucune activité non supprimée n'est liée
 - [ ] Soft delete + enregistrer `deleted_by`
@@ -304,8 +314,9 @@
   - ✅ GET /projets/:projet_id/animateurs
   - ❌ Reste à faire : PUT/:animateur_id, DELETE/:animateur_id
 - Phase 7 : Objectifs pédagogiques
-  - ✅ POST /projets/:projet_id/objectifs (avec tests)
-  - ❌ Reste à faire : PUT/:id, DELETE/:id, GET (liste et détails)
+  - ✅ POST /projets/:projet_id/objectifs (8 tests)
+  - ✅ GET /projets/:projet_id/objectifs (7 tests)
+  - ❌ Reste à faire : PUT/:id, DELETE/:id
 
 ### ❌ À faire
 - Phase 3 : Authentification et sessions
@@ -371,6 +382,12 @@
 - ✅ Ajouter les validations nécessaires (projet, animateur, appartenance)
 - ✅ Enregistrer le créateur avec `created_by`
 - ✅ Créer 8 tests complets (succès, ordre par défaut, champs manquants, erreurs 404/403)
+- ✅ Séparer les fichiers projets.ts et projets.test.ts en plus petits fichiers
+- ✅ Créer la route GET `/projets/:projet_id/objectifs`
+- ✅ Récupérer la liste des objectifs d'un projet
+- ✅ Ajouter le paramètre `?with=details` pour charger les créateurs
+- ✅ Trier les objectifs par ordre puis date de création
+- ✅ Créer 7 tests complets (liste, vide, inexistant, supprimé, avec détails, créateurs supprimés, tri)
 
 ---
 

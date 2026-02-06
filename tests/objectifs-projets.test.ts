@@ -195,3 +195,226 @@ describe('POST /projets/:projet_id/objectifs', () => {
     expect(response.body.error).toBe('Projet non trouvé');
   });
 });
+
+describe('GET /projets/:projet_id/objectifs', () => {
+  let animateur1Id: string;
+  let animateur2Id: string;
+  let projetId: string;
+
+  beforeEach(async () => {
+    // Créer deux animateurs
+    const animateur1 = await Animateur.create({
+      email: `test1-${Date.now()}@example.com`,
+      password: await bcrypt.hash('password123', 10),
+      nom: 'Animateur 1',
+    });
+    animateur1Id = animateur1.id;
+
+    const animateur2 = await Animateur.create({
+      email: `test2-${Date.now()}@example.com`,
+      password: await bcrypt.hash('password456', 10),
+      nom: 'Animateur 2',
+    });
+    animateur2Id = animateur2.id;
+
+    // Créer un projet
+    const projet = await Projet.create({
+      nom: 'Projet Test Objectifs',
+      description: 'Projet pour tester les objectifs',
+      date_debut: new Date('2026-06-01'),
+      date_fin: new Date('2026-08-31'),
+    });
+    projetId = projet.id;
+
+    // Ajouter les animateurs au projet
+    await AnimateurProjet.create({
+      animateur_id: animateur1Id,
+      projet_id: projetId,
+      role: 'coordinateur',
+    });
+
+    await AnimateurProjet.create({
+      animateur_id: animateur2Id,
+      projet_id: projetId,
+      role: 'assistant',
+    });
+
+    // Créer quelques objectifs
+    await Objectif.create({
+      projet_id: projetId,
+      texte: 'Objectif 1',
+      ordre: 1,
+      created_by: animateur1Id,
+    });
+
+    await Objectif.create({
+      projet_id: projetId,
+      texte: 'Objectif 2',
+      ordre: 2,
+      created_by: animateur2Id,
+    });
+
+    await Objectif.create({
+      projet_id: projetId,
+      texte: 'Objectif 3',
+      ordre: 3,
+      created_by: animateur1Id,
+    });
+  });
+
+  afterEach(async () => {
+    // Nettoyer
+    await Objectif.destroy({ where: {} });
+    await AnimateurProjet.destroy({ where: {} });
+    await Projet.destroy({ where: { id: projetId }, force: true });
+    await Animateur.destroy({ where: { id: animateur1Id }, force: true });
+    await Animateur.destroy({ where: { id: animateur2Id }, force: true });
+  });
+
+  it('devrait récupérer la liste des objectifs d\'un projet', async () => {
+    const response = await request(app)
+      .get(`/projets/${projetId}/objectifs`)
+      .expect(200);
+
+    expect(response.body.projet_id).toBe(projetId);
+    expect(response.body.count).toBe(3);
+    expect(response.body.objectifs).toBeInstanceOf(Array);
+    expect(response.body.objectifs.length).toBe(3);
+
+    // Vérifier que les objectifs sont triés par ordre
+    expect(response.body.objectifs[0].texte).toBe('Objectif 1');
+    expect(response.body.objectifs[1].texte).toBe('Objectif 2');
+    expect(response.body.objectifs[2].texte).toBe('Objectif 3');
+  });
+
+  it('devrait retourner une liste vide si aucun objectif', async () => {
+    // Créer un nouveau projet sans objectifs
+    const projetVide = await Projet.create({
+      nom: 'Projet Vide',
+    });
+
+    const response = await request(app)
+      .get(`/projets/${projetVide.id}/objectifs`)
+      .expect(200);
+
+    expect(response.body.projet_id).toBe(projetVide.id);
+    expect(response.body.count).toBe(0);
+    expect(response.body.objectifs).toEqual([]);
+
+    // Nettoyer
+    await Projet.destroy({ where: { id: projetVide.id }, force: true });
+  });
+
+  it('devrait retourner 404 si le projet n\'existe pas', async () => {
+    const response = await request(app)
+      .get(`/projets/00000000-0000-0000-0000-000000000000/objectifs`)
+      .expect(404);
+
+    expect(response.body.error).toBe('Projet non trouvé');
+  });
+
+  it('devrait retourner 404 si le projet est supprimé', async () => {
+    // Supprimer le projet
+    await Projet.update({ deleted_at: new Date() }, { where: { id: projetId } });
+
+    const response = await request(app)
+      .get(`/projets/${projetId}/objectifs`)
+      .expect(404);
+
+    expect(response.body.error).toBe('Projet non trouvé');
+  });
+
+  it('devrait charger les détails complets quand with=details', async () => {
+    const response = await request(app)
+      .get(`/projets/${projetId}/objectifs?with=details`)
+      .expect(200);
+
+    expect(response.body.count).toBe(3);
+    expect(response.body.objectifs).toBeInstanceOf(Array);
+
+    // Vérifier que les données complètes sont incluses
+    const obj1 = response.body.objectifs[0];
+    expect(obj1.texte).toBe('Objectif 1');
+    expect(obj1.created_by).toBe(animateur1Id);
+    expect(obj1.createdByAnimateur).toBeDefined();
+    expect(obj1.createdByAnimateur.id).toBe(animateur1Id);
+    expect(obj1.createdByAnimateur.nom).toBe('Animateur 1');
+    expect(obj1.createdByAnimateur.password).toBeUndefined(); // Mot de passe ne doit pas être retourné
+
+    const obj2 = response.body.objectifs[1];
+    expect(obj2.texte).toBe('Objectif 2');
+    expect(obj2.created_by).toBe(animateur2Id);
+    expect(obj2.createdByAnimateur.id).toBe(animateur2Id);
+    expect(obj2.createdByAnimateur.nom).toBe('Animateur 2');
+  });
+
+  it('ne devrait pas retourner les objectifs supprimés', async () => {
+    // Supprimer un objectif (soft delete avec deleted_at)
+    await Objectif.update({ deleted_at: new Date() }, { where: { texte: 'Objectif 2' } });
+
+    const response = await request(app)
+      .get(`/projets/${projetId}/objectifs`)
+      .expect(200);
+
+    expect(response.body.count).toBe(2);
+    expect(response.body.objectifs.length).toBe(2);
+
+    const textes = response.body.objectifs.map((o: any) => o.texte);
+    expect(textes).not.toContain('Objectif 2');
+    expect(textes).toContain('Objectif 1');
+    expect(textes).toContain('Objectif 3');
+  });
+
+  it('devrait conserver les objectifs dont le créateur a été supprimé quand with=details', async () => {
+    // Supprimer l'animateur 1
+    await Animateur.update({ deleted_at: new Date() }, { where: { id: animateur1Id } });
+
+    const response = await request(app)
+      .get(`/projets/${projetId}/objectifs?with=details`)
+      .expect(200);
+
+    // Devrait retourner tous les objectifs, y compris ceux créés par l'animateur supprimé
+    expect(response.body.count).toBe(3);
+    expect(response.body.objectifs.length).toBe(3);
+
+    // Vérifier que les objectifs créés par l'animateur supprimé sont là avec les données complètes
+    const obj1 = response.body.objectifs[0];
+    expect(obj1.texte).toBe('Objectif 1');
+    expect(obj1.created_by).toBe(animateur1Id);
+    expect(obj1.createdByAnimateur).toBeDefined(); // L'animateur est présent
+    expect(obj1.createdByAnimateur.id).toBe(animateur1Id);
+    expect(obj1.createdByAnimateur.deleted_at).not.toBeNull(); // Marqué comme supprimé
+
+    // Les objectifs créés par l'animateur 2 doivent aussi avoir les données complètes
+    const obj2 = response.body.objectifs[1];
+    expect(obj2.texte).toBe('Objectif 2');
+    expect(obj2.created_by).toBe(animateur2Id);
+    expect(obj2.createdByAnimateur).toBeDefined();
+    expect(obj2.createdByAnimateur.id).toBe(animateur2Id);
+    expect(obj2.createdByAnimateur.deleted_at).toBeNull(); // Pas supprimé
+  });
+
+  it('devrait trier les objectifs par ordre puis par date de création', async () => {
+    // Créer un objectif sans ordre spécifié (ordre par défaut 0)
+    await Objectif.create({
+      projet_id: projetId,
+      texte: 'Objectif sans ordre',
+      created_by: animateur1Id,
+    });
+
+    const response = await request(app)
+      .get(`/projets/${projetId}/objectifs`)
+      .expect(200);
+
+    expect(response.body.count).toBe(4);
+
+    // Objectif sans ordre (0) devrait être en premier
+    expect(response.body.objectifs[0].texte).toBe('Objectif sans ordre');
+
+    // Puis les autres par ordre croissant
+    expect(response.body.objectifs[1].texte).toBe('Objectif 1');
+    expect(response.body.objectifs[2].texte).toBe('Objectif 2');
+    expect(response.body.objectifs[3].texte).toBe('Objectif 3');
+  });
+});
+
