@@ -351,43 +351,37 @@
 
 ---
 
-## Résumé des tâches demandées vs complétées
+## Résumé des implémentations complétées par entité
 
-### Tâches antérieures (complétées)
-- ✅ Créer la route GET `/animateurs` avec paramètre optionnel id_projet
-- ✅ Créer la route DELETE `/animateurs` avec soft delete
-- ✅ Créer la table `projets` et table de liaison `animateurProjet`
-- ✅ Ajouter champ deleted_at à `animateurProjet` pour soft delete
-- ✅ Créer la route POST `/projets` avec animateur_id et rôle
-- ✅ Créer la route GET `/animateurs/:id?with=projets`
-- ✅ Tests animateurs.test.ts : Problèmes de concurrence résolus
-- ✅ Accès concurrents : Solution implémentée (Jest en série)
+### ✅ Routes Animateurs
+- [x] POST `/animateurs` - Créer un animateur (avec bcrypt)
+- [x] GET `/animateurs` - Lister les animateurs (paramètre optionnel id_projet)
+- [x] GET `/animateurs/:id` - Détails avec paramètre optionnel `?with=projets`
+- [x] DELETE `/animateurs/:id` - Soft delete
+- [x] Tests complets (validations, soft delete, permissions)
 
-### Tâche actuelle (complétée)
-- ✅ Créer la route GET `/projets/:id`
-- ✅ Ajouter paramètre optionnel `?with=animateurs`
-- ✅ Charger les détails complets des animateurs
-- ✅ Créer les tests unitaires complets
-- ✅ Créer la route POST `/projets/:id/animateurs`
-- ✅ Ajouter un animateur à un projet via email
-- ✅ Intégrer les tests pour cette route
-- ✅ Créer la route GET `/projets/:projet_id/animateurs`
-- ✅ Retourner la liste des animateurs d'un projet
-- ✅ Ajouter paramètre optionnel `?with=details`
-- ✅ Charger les détails complets (sans mot de passe)
-- ✅ Créer 6 tests complets (liste simple, avec détails, vide, inexistant, supprimé)
-- ✅ Mettre à jour le plan de développement
-- ✅ Créer la route POST `/projets/:projet_id/objectifs`
-- ✅ Créer un nouvel objectif pour un projet
-- ✅ Ajouter les validations nécessaires (projet, animateur, appartenance)
-- ✅ Enregistrer le créateur avec `created_by`
-- ✅ Créer 8 tests complets (succès, ordre par défaut, champs manquants, erreurs 404/403)
-- ✅ Séparer les fichiers projets.ts et projets.test.ts en plus petits fichiers
-- ✅ Créer la route GET `/projets/:projet_id/objectifs`
-- ✅ Récupérer la liste des objectifs d'un projet
-- ✅ Ajouter le paramètre `?with=details` pour charger les créateurs
-- ✅ Trier les objectifs par ordre puis date de création
-- ✅ Créer 7 tests complets (liste, vide, inexistant, supprimé, avec détails, créateurs supprimés, tri)
+### ✅ Routes Projets (base)
+- [x] POST `/projets` - Créer un projet avec animateur initial
+- [x] GET `/projets` - Lister tous les projets
+- [x] GET `/projets/:id` - Détails avec paramètre optionnel `?with=animateurs`
+- [x] Tests complets (validation dates, soft delete, permissions)
+
+### ✅ Routes Gestion des animateurs par projet
+- [x] POST `/projets/:id/animateurs` - Ajouter un animateur via email
+- [x] GET `/projets/:projet_id/animateurs` - Lister les animateurs du projet
+- [x] Tests complets (8 tests) pour les deux routes
+
+### ✅ Routes Objectifs
+- [x] POST `/projets/:projet_id/objectifs` - Créer un objectif
+- [x] GET `/projets/:projet_id/objectifs` - Lister les objectifs avec tri et `?with=details`
+- [x] Tests complets (15 tests) : création, validation, récupération, suppression des créateurs
+
+### ✅ Infrastructure et modèles
+- [x] Modèles Sequelize : Animateur, Projet, AnimateurProjet, Objectif
+- [x] Associations Sequelize configurées
+- [x] Tables SQL avec soft delete (deleted_at)
+- [x] Séparation des routes en fichiers modulaires (4 fichiers routes, 4 fichiers tests)
+- [x] Chaînes de créateurs/modificateurs (created_by, modified_by, deleted_by)
 
 ---
 
