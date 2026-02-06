@@ -371,3 +371,46 @@
 - ✅ Ajouter les validations nécessaires (projet, animateur, appartenance)
 - ✅ Enregistrer le créateur avec `created_by`
 - ✅ Créer 8 tests complets (succès, ordre par défaut, champs manquants, erreurs 404/403)
+
+---
+
+## Architecture des routes et tests
+
+### Organisation des routes Projets
+Pour maintenir la maintenabilité et éviter les fichiers trop volumineux, les routes ont été séparées:
+
+- **`src/routes/projets.ts`** (principal):
+  - `POST /projets` - Créer un projet
+  - `GET /projets` - Lister les projets
+  - Intègre les sub-routeurs
+
+- **`src/routes/projets-details.ts`**:
+  - `GET /projets/:id` - Détails d'un projet
+
+- **`src/routes/animateurs-projets.ts`**:
+  - `POST /projets/:id/animateurs` - Ajouter un animateur
+  - `GET /projets/:projet_id/animateurs` - Lister les animateurs
+
+- **`src/routes/objectifs-projets.ts`**:
+  - `POST /projets/:projet_id/objectifs` - Créer un objectif
+
+### Organisation des tests
+Les tests sont séparés par fonctionnalité:
+
+- **`tests/projets.test.ts`** (agrégateur):
+  - Importe tous les fichiers de test spécifiques
+
+- **`tests/projets.create-list.test.ts`**:
+  - Tests pour POST et GET /projets
+
+- **`tests/projets.details.test.ts`**:
+  - Tests pour GET /projets/:id
+
+- **`tests/animateurs-projets.test.ts`**:
+  - Tests pour POST et GET /projets/:id/animateurs
+
+- **`tests/objectifs-projets.test.ts`**:
+  - Tests pour POST /projets/:projet_id/objectifs
+
+---
+
