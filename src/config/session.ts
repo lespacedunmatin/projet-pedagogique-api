@@ -1,24 +1,67 @@
 import session from 'express-session';
-import ConnectSessionSequelize from 'connect-session-sequelize';
 import sequelize from '../database/config';
-
-const SequelizeStore = ConnectSessionSequelize(session.Store);
+import Session from '../models/Session';
 
 /**
  * Configuration des sessions avec Sequelize
  * Stocke les sessions en base de données pour la persistence
  */
-const sessionStore = new SequelizeStore({
-  db: sequelize,
-  table: 'sessions',
-  extendDefaultFields: {
-    data: {
-      type: sequelize.Sequelize.JSON,
-      allowNull: false,
-      defaultValue: {},
-    },
-  },
-});
+
+// Store personnalisé pour les sessions Sequelize
+class SequelizeStore extends session.Store {
+  db: any;
+
+  constructor(options: any) {
+    super();
+    this.db = options.db;
+  }
+
+  async get(sid: string, callback: (err: any, session?: any) => void) {
+    try {
+      const session = await Session.findByPk(sid);
+      if (!session) {
+        return callback(null);
+      }
+      return callback(null, session.data);
+    } catch (error) {
+      return callback(error);
+    }
+  }
+
+  async set(sid: string, sessionData: any, callback?: (err?: any) => void) {
+    try {
+      const expires = new Date(Date.now() + (24 * 60 * 60 * 1000)); // 24 heures
+      await Session.upsert({
+        sid,
+        data: sessionData,
+        expires,
+      });
+      callback?.();
+    } catch (error) {
+      callback?.(error);
+    }
+  }
+
+  async destroy(sid: string, callback?: (err?: any) => void) {
+    try {
+      await Session.destroy({ where: { sid } });
+      callback?.();
+    } catch (error) {
+      callback?.(error);
+    }
+  }
+
+  async clear(callback?: (err?: any) => void) {
+    try {
+      await Session.destroy({ where: {} });
+      callback?.();
+    } catch (error) {
+      callback?.(error);
+    }
+  }
+}
+
+const sessionStore = new SequelizeStore({ db: sequelize });
 
 /**
  * Middleware de configuration des sessions
@@ -64,7 +107,7 @@ const sessionMiddleware = session({
  */
 async function initializeSessionStore() {
   try {
-    await sessionStore.sync();
+    await Session.sync();
     console.log('✓ Table sessions créée/synchronisée');
   } catch (error) {
     console.error('Erreur lors de l\'initialisation de la table sessions:', error);

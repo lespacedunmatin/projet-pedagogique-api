@@ -5,7 +5,8 @@ import { Request, Response, NextFunction } from 'express';
  * Redirige vers /auth/login ou retourne une erreur 401 selon le type de requête
  */
 function isAuthenticated(req: Request, res: Response, next: NextFunction) {
-  if (req.session && req.session.authenticated && req.session.userId) {
+  const session = req.session as any;
+  if (session && session.authenticated && session.userId) {
     return next();
   }
 
@@ -26,7 +27,8 @@ function isAuthenticated(req: Request, res: Response, next: NextFunction) {
  * Utilisé sur les routes de login/register
  */
 function isNotAuthenticated(req: Request, res: Response, next: NextFunction) {
-  if (!req.session || !req.session.authenticated || !req.session.userId) {
+  const session = req.session as any;
+  if (!session || !session.authenticated || !session.userId) {
     return next();
   }
 
@@ -43,11 +45,12 @@ function isNotAuthenticated(req: Request, res: Response, next: NextFunction) {
  */
 function logSession(req: Request, res: Response, next: NextFunction) {
   if (process.env.DEBUG_SESSION === 'true') {
+    const session = req.session as any;
     console.log(`[Session] ${req.method} ${req.path}`, {
       sessionId: req.sessionID,
-      authenticated: req.session?.authenticated,
-      userId: req.session?.userId,
-      userName: req.session?.userName,
+      authenticated: session?.authenticated,
+      userId: session?.userId,
+      userName: session?.userName,
     });
   }
   next();

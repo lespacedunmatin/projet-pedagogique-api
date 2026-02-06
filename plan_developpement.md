@@ -69,6 +69,25 @@
 - [x] Créer un événement MySQL pour nettoyer les sessions expirées
 
 ### 3.2 Sécurité des mots de passe
+- [x] Implémenter la validation forte des mots de passe
+  - Au moins 12 caractères
+  - Au moins une lettre majuscule
+  - Au moins une lettre minuscule
+  - Au moins un chiffre
+  - Au moins un caractère spécial
+- [x] Hachage des mots de passe avec bcrypt
+
+### 3.3 Routes d'authentification
+- [x] POST `/auth/register` - Inscription
+  - [x] Validation des paramètres (email, mot de passe, nom)
+  - [x] Vérification de l'unicité de l'email
+  - [x] Validation du format email
+  - [x] Validation de la force du mot de passe
+  - [x] Hachage du mot de passe
+  - [x] Création de la session
+  - [x] Tests complets (12 tests)
+
+### 3.2 Sécurité des mots de passe
 - [x] Installer et configurer `bcrypt`
 - [x] Créer un utilitaire de hachage/vérification
 - [ ] Créer un utilitaire de validation des mots de passe (12 char min + 3 types)
@@ -321,6 +340,11 @@
   - Cookies HttpOnly et CSRF protection
   - Middlewares d'authentification
   - Table sessions avec nettoyage automatique
+- Phase 3.2 : Sécurité des mots de passe (validation forte + bcrypt)
+- Phase 3.3 : Route POST /auth/register (12 tests)
+  - Inscription avec validation
+  - Établissement de la session
+  - Création de l'animateur
 - Phase 5.1 : Routes complètes pour Animateurs
   - POST /animateurs
   - GET /animateurs (avec paramètre id_projet)
@@ -331,9 +355,9 @@
 ### ⚠️ En cours
 - Phase 3 : Authentification et sessions
   - ✅ Phase 3.1 : Configuration des sessions (complétée)
-  - ❌ Phase 3.2 : Sécurité des mots de passe (validation forte)
-  - ❌ Phase 3.3 : Routes d'authentification (register, login, logout, me)
-  - ❌ Phase 3.4 : Middlewares d'authentification
+  - ✅ Phase 3.2 : Sécurité des mots de passe (complétée)
+  - ✅ Phase 3.3 : Route POST /auth/register (complétée)
+  - ❌ Phase 3.4 : Routes POST /auth/login, POST /auth/logout, GET /auth/me
 - Phase 5.2 : Routes Projets
   - ✅ POST /projets (avec création AnimateurProjet)
   - ✅ GET /projets

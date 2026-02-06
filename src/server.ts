@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import { setupAssociations } from './database/associations';
 import { sessionMiddleware, initializeSessionStore } from './config/session';
 import animateursRouter from './routes/animateurs';
+import authRouter from './routes/auth';
 import projetsRouter from './routes/projets';
 
 const app = express();
@@ -24,13 +25,16 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Middleware de sessions
-app.use(sessionMiddleware);
-
-// Routes
+// Route status accessible sans session
 app.get('/status', (req, res) => {
   res.json({ message: 'le serveur fonctionne' });
 });
+
+// Middleware de sessions (après les routes publiques)
+app.use(sessionMiddleware);
+
+// Routes d'authentification
+app.use('/auth', authRouter);
 
 // Routes animateurs
 app.use('/animateurs', animateursRouter);
