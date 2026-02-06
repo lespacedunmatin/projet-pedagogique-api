@@ -5,6 +5,7 @@ import Animateur from '../models/Animateur';
 import projetDetailsRouter from './projets-details';
 import animateursProjetRouter from './animateurs-projets';
 import objectifsProjetRouter from './objectifs-projets';
+import activitesProjetRouter from './activites-projets';
 
 const router = express.Router();
 
@@ -110,5 +111,6 @@ router.get('/', async (req: Request, res: Response) => {
 router.use('/', projetDetailsRouter);
 router.use('/', animateursProjetRouter);
 router.use('/', objectifsProjetRouter);
+router.use('/', activitesProjetRouter);
 
 export default router;

@@ -209,15 +209,31 @@
 ## Phase 8 : Activités (semaine 5-6)
 
 ### 8.1 POST `/projets/:projet_id/activites` - Créer
-- [ ] Créer le contrôleur `activiteController.create()`
-- [ ] Vérifier les permissions
-- [ ] Validation des dates (fin > début)
-- [ ] Validation que les dates sont dans la période du projet
-- [ ] Créer les liaisons avec les objectifs
-- [ ] Créer la route
-- [ ] Ajouter les tests
+- [x] Créer le contrôleur pour créer une activité
+- [x] Validation du nom (obligatoire)
+- [x] Validation des dates (debut < fin)
+- [x] Validation que le projet existe et n'est pas supprimé
+- [x] Validation que l'animateur existe et n'est pas supprimé
+- [x] Validation que l'animateur est membre du projet
+- [x] Validation que l'animateur créateur est membre du projet
+- [x] Validation que les dates sont dans la période du projet
+- [x] Validation que le responsable (optionnel) existe et n'est pas supprimé
+- [x] Validation que le responsable est membre du projet
+- [x] Enregistrer `created_by` avec l'ID de l'animateur
+- [x] Créer la route
+- [x] Ajouter les tests (13 tests: succès, sans responsable, champs manquants, dates invalides, projet inexistant, animateur inexistant, responsable inexistant, erreurs de permission, projet supprimé)
 
-### 8.2 PUT `/projets/:projet_id/activites/:id` - Modifier
+### 8.2 GET `/projets/:projet_id/activites` - Lister
+- [x] Créer le contrôleur pour lister les activités
+- [x] Filtrer les activités non supprimées d'un projet (deleted_at = null)
+- [x] Trier par ordre puis date de création
+- [x] Paramètre optionnel `with=details` pour charger les créateurs, responsables et modificateurs
+- [x] Vérifier que le projet existe et n'est pas supprimé
+- [x] Conserver les activités dont le créateur/responsable a été supprimé (retourner null)
+- [x] Créer la route
+- [x] Ajouter les tests (7 tests: liste complète, liste vide, projet inexistant, projet supprimé, avec détails, créateurs supprimés, tri)
+
+### 8.3 PUT `/projets/:projet_id/activites/:id` - Modifier
 - [ ] Créer le contrôleur `activiteController.update()`
 - [ ] Vérifier les permissions
 - [ ] Validation des dates
@@ -225,7 +241,7 @@
 - [ ] Créer la route
 - [ ] Ajouter les tests
 
-### 8.3 DELETE `/projets/:projet_id/activites/:id` - Supprimer
+### 8.4 DELETE `/projets/:projet_id/activites/:id` - Supprimer
 - [ ] Créer le contrôleur `activiteController.delete()`
 - [ ] Soft delete + enregistrer `deleted_by`
 - [ ] Créer la route
@@ -317,6 +333,10 @@
   - ✅ POST /projets/:projet_id/objectifs (8 tests)
   - ✅ GET /projets/:projet_id/objectifs (7 tests)
   - ❌ Reste à faire : PUT/:id, DELETE/:id
+- Phase 8 : Activités
+  - ✅ POST /projets/:projet_id/activites (13 tests)
+  - ✅ GET /projets/:projet_id/activites (7 tests)
+  - ❌ Reste à faire : PUT/:id, DELETE/:id
 
 ### ❌ À faire
 - Phase 3 : Authentification et sessions
@@ -375,6 +395,13 @@
 - [x] POST `/projets/:projet_id/objectifs` - Créer un objectif
 - [x] GET `/projets/:projet_id/objectifs` - Lister les objectifs avec tri et `?with=details`
 - [x] Tests complets (15 tests) : création, validation, récupération, suppression des créateurs
+
+### ✅ Routes Activités
+- [x] POST `/projets/:projet_id/activites` - Créer une activité
+- [x] GET `/projets/:projet_id/activites` - Lister les activités avec tri et `?with=details`
+- [x] Validation complète (dates, période du projet, permissions)
+- [x] Support du responsable optionnel
+- [x] Tests complets (13 + 7 tests) : création et récupération
 
 ### ✅ Infrastructure et modèles
 - [x] Modèles Sequelize : Animateur, Projet, AnimateurProjet, Objectif
