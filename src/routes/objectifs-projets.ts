@@ -129,8 +129,8 @@ router.get('/:projet_id/objectifs', async (req: Request, res: Response) => {
             },
           });
 
-          const modifiedByAnimateur = objectif.modified_by
-            ? await Animateur.findByPk(objectif.modified_by, {
+          const updatedByAnimateur = objectif.updated_by
+            ? await Animateur.findByPk(objectif.updated_by, {
                 attributes: {
                   exclude: ['password'],
                 },
@@ -143,11 +143,11 @@ router.get('/:projet_id/objectifs', async (req: Request, res: Response) => {
             texte: objectif.texte,
             ordre: objectif.ordre,
             created_by: objectif.created_by,
-            modified_by: objectif.modified_by,
+            updated_by: objectif.updated_by,
             created_at: objectif.created_at,
             updated_at: objectif.updated_at,
             createdByAnimateur: createdByAnimateur || null,
-            modifiedByAnimateur: modifiedByAnimateur || null,
+            updatedByAnimateur: updatedByAnimateur || null,
           };
         })
       );

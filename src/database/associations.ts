@@ -7,6 +7,8 @@ import Animateur from '../models/Animateur';
 import Projet from '../models/Projet';
 import AnimateurProjet from '../models/AnimateurProjet';
 import Objectif from '../models/Objectif';
+import Activite from '../models/Activite';
+import ActiviteObjectif from '../models/ActiviteObjectif';
 
 export function setupAssociations() {
   // Animateur <-> Projet (many-to-many via AnimateurProjet)
@@ -58,10 +60,71 @@ export function setupAssociations() {
     as: 'createdByAnimateur',
   });
 
-  // Objectif -> Animateur (modified_by)
+  // Objectif -> Animateur (updated_by)
   Objectif.belongsTo(Animateur, {
-    foreignKey: 'modified_by',
-    as: 'modifiedByAnimateur',
+    foreignKey: 'updated_by',
+    as: 'updatedByAnimateur',
+  });
+
+  // Projet -> Activite (one-to-many)
+  Projet.hasMany(Activite, {
+    foreignKey: 'projet_id',
+    as: 'activites',
+  });
+
+  Activite.belongsTo(Projet, {
+    foreignKey: 'projet_id',
+    as: 'projet',
+  });
+
+  // Activite -> Animateur (created_by)
+  Activite.belongsTo(Animateur, {
+    foreignKey: 'created_by',
+    as: 'createdByAnimateur',
+  });
+
+  // Activite -> Animateur (responsable_id)
+  Activite.belongsTo(Animateur, {
+    foreignKey: 'responsable_id',
+    as: 'responsableAnimateur',
+  });
+
+  // Activite -> Animateur (updated_by)
+  Activite.belongsTo(Animateur, {
+    foreignKey: 'updated_by',
+    as: 'updatedByAnimateur',
+  });
+
+  // Activite -> Animateur (deleted_by)
+  Activite.belongsTo(Animateur, {
+    foreignKey: 'deleted_by',
+    as: 'deletedByAnimateur',
+  });
+
+  // Activite <-> Objectif (many-to-many via ActiviteObjectif)
+  Activite.belongsToMany(Objectif, {
+    through: ActiviteObjectif,
+    foreignKey: 'activite_id',
+    otherKey: 'objectif_id',
+    as: 'objectifs',
+  });
+
+  Objectif.belongsToMany(Activite, {
+    through: ActiviteObjectif,
+    foreignKey: 'objectif_id',
+    otherKey: 'activite_id',
+    as: 'activites',
+  });
+
+  // ActiviteObjectif associations
+  ActiviteObjectif.belongsTo(Activite, {
+    foreignKey: 'activite_id',
+    as: 'activite',
+  });
+
+  ActiviteObjectif.belongsTo(Objectif, {
+    foreignKey: 'objectif_id',
+    as: 'objectif',
   });
 
   console.log('✓ Associations Sequelize configurées');

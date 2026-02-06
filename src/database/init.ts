@@ -3,6 +3,8 @@ import Animateur from '../models/Animateur';
 import Projet from '../models/Projet';
 import AnimateurProjet from '../models/AnimateurProjet';
 import Objectif from '../models/Objectif';
+import Activite from '../models/Activite';
+import ActiviteObjectif from '../models/ActiviteObjectif';
 import { setupAssociations } from './associations';
 import * as crypto from 'crypto';
 import { Sequelize } from 'sequelize';

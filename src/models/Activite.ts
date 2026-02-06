@@ -1,10 +1,14 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../database/config';
 
-interface ObjectifAttributes {
+interface ActiviteAttributes {
   id: string;
   projet_id: string;
-  texte: string;
+  nom: string;
+  description?: string;
+  date_debut: Date;
+  date_fin: Date;
+  responsable_id?: string | null;
   ordre?: number;
   created_at?: Date;
   created_by: string;
@@ -14,12 +18,16 @@ interface ObjectifAttributes {
   deleted_by?: string | null;
 }
 
-interface ObjectifCreationAttributes extends Optional<ObjectifAttributes, 'id' | 'created_at' | 'updated_at' | 'deleted_at' | 'deleted_by' | 'updated_by'> {}
+interface ActiviteCreationAttributes extends Optional<ActiviteAttributes, 'id' | 'created_at' | 'updated_at' | 'deleted_at' | 'deleted_by' | 'updated_by'> {}
 
-class Objectif extends Model<ObjectifAttributes, ObjectifCreationAttributes> implements ObjectifAttributes {
+class Activite extends Model<ActiviteAttributes, ActiviteCreationAttributes> implements ActiviteAttributes {
   declare id: string;
   declare projet_id: string;
-  declare texte: string;
+  declare nom: string;
+  declare description?: string;
+  declare date_debut: Date;
+  declare date_fin: Date;
+  declare responsable_id?: string | null;
   declare ordre?: number;
   declare created_at?: Date;
   declare created_by: string;
@@ -29,7 +37,7 @@ class Objectif extends Model<ObjectifAttributes, ObjectifCreationAttributes> imp
   declare deleted_by?: string | null;
 }
 
-Objectif.init(
+Activite.init(
   {
     id: {
       type: DataTypes.UUID,
@@ -44,17 +52,33 @@ Objectif.init(
         key: 'id',
       },
     },
-    texte: {
-      type: DataTypes.TEXT,
+    nom: {
+      type: DataTypes.STRING(255),
       allowNull: false,
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    date_debut: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    date_fin: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    responsable_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'animateurs',
+        key: 'id',
+      },
     },
     ordre: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
     },
     created_by: {
       type: DataTypes.UUID,
@@ -64,10 +88,6 @@ Objectif.init(
         key: 'id',
       },
     },
-    updated_at: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
     updated_by: {
       type: DataTypes.UUID,
       allowNull: true,
@@ -75,6 +95,14 @@ Objectif.init(
         model: 'animateurs',
         key: 'id',
       },
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
     },
     deleted_at: {
       type: DataTypes.DATE,
@@ -91,11 +119,11 @@ Objectif.init(
   },
   {
     sequelize,
-    tableName: 'objectifs',
+    tableName: 'activites',
     timestamps: true,
     underscored: true,
     paranoid: false, // On gère le soft delete manuellement avec deleted_at
   }
 );
 
-export default Objectif;
+export default Activite;

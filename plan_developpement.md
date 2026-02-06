@@ -34,15 +34,15 @@
 - [x] Modèle `Projet` (avec soft delete - deleted_at)
 - [x] Modèle `AnimateurProjet` (liaison, avec soft delete - deleted_at)
 - [x] Modèle `Objectif` (avec soft delete - deleted_at)
-- [ ] Modèle `Activite` (avec soft delete - deleted_at)
-- [ ] Modèle `ActiviteObjectif` (liaison, avec soft delete - deleted_at)
+- [x] Modèle `Activite` (avec soft delete - deleted_at)
+- [x] Modèle `ActiviteObjectif` (liaison, avec soft delete - deleted_at)
 - [ ] Modèle `Invitation` (avec soft delete - deleted_at)
 
 ### 2.2 Configurer les associations
 - [x] Animateur ↔ Projet (many-to-many via AnimateurProjet) - Configurée en base de données
 - [x] Projet → Objectif (one-to-many)
-- [ ] Projet → Activite (one-to-many)
-- [ ] Objectif ↔ Activite (many-to-many via ActiviteObjectif)
+- [x] Projet → Activite (one-to-many)
+- [x] Objectif ↔ Activite (many-to-many via ActiviteObjectif)
 - [ ] Animateur → Invitation (one-to-many pour `invited_by`)
 
 ### 2.3 Créer les migrations
@@ -50,8 +50,8 @@
 - [x] Migration pour la table `projets`
 - [x] Migration pour la table `animateurs_projets`
 - [x] Migration pour la table `objectifs`
-- [ ] Migration pour la table `activites`
-- [ ] Migration pour la table `activites_objectifs`
+- [x] Migration pour la table `activites`
+- [x] Migration pour la table `activites_objectifs`
 - [ ] Migration pour la table `invitations`
 
 ---
