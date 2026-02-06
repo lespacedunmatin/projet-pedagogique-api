@@ -2,20 +2,30 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { setupAssociations } from './database/associations';
+import { sessionMiddleware, initializeSessionStore } from './config/session';
 import animateursRouter from './routes/animateurs';
 import projetsRouter from './routes/projets';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Initialiser les sessions au démarrage
+initializeSessionStore().catch((error) => {
+  console.error('Erreur lors de l\'initialisation des sessions:', error);
+  process.exit(1);
+});
+
 // Configurer les associations Sequelize
 setupAssociations();
 
-// Middleware
+// Middleware de sécurité et parsing
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Middleware de sessions
+app.use(sessionMiddleware);
 
 // Routes
 app.get('/status', (req, res) => {

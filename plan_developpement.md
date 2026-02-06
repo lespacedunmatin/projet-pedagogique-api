@@ -59,9 +59,14 @@
 ## Phase 3 : Authentification (semaine 2)
 
 ### 3.1 Configuration des sessions
-- [ ] Installer `express-session` et `connect-session-sequelize`
-- [ ] Configurer les sessions avec stockage en base de données
-- [ ] Configurer les cookies HttpOnly et CSRF protection
+- [x] Installer `express-session` et `connect-session-sequelize`
+- [x] Configurer les sessions avec stockage en base de données
+- [x] Configurer les cookies HttpOnly et CSRF protection
+- [x] Créer le modèle Session pour la table des sessions
+- [x] Créer les middlewares d'authentification (isAuthenticated, isNotAuthenticated)
+- [x] Intégrer les sessions au serveur Express
+- [x] Créer les types TypeScript pour les sessions
+- [x] Créer un événement MySQL pour nettoyer les sessions expirées
 
 ### 3.2 Sécurité des mots de passe
 - [x] Installer et configurer `bcrypt`
@@ -309,9 +314,13 @@
 
 ### ✅ Complété
 - Phase 1 : Infrastructure et configuration
-- Phase 2 : Modèles de données (Animateur, Projet, AnimateurProjet, Objectif)
-- Phase 2.2 : Associations Sequelize (Animateur-Projet, Projet-Objectif)
-- Phase 3.2 : Sécurité des mots de passe avec bcrypt
+- Phase 2 : Modèles de données (Animateur, Projet, AnimateurProjet, Objectif, Activite)
+- Phase 2.2 : Associations Sequelize (Animateur-Projet, Projet-Objectif, Projet-Activite, Objectif-Activite)
+- Phase 3.1 : Configuration des sessions
+  - express-session avec stockage Sequelize
+  - Cookies HttpOnly et CSRF protection
+  - Middlewares d'authentification
+  - Table sessions avec nettoyage automatique
 - Phase 5.1 : Routes complètes pour Animateurs
   - POST /animateurs
   - GET /animateurs (avec paramètre id_projet)
@@ -320,6 +329,11 @@
   - Tests complets avec support soft delete
 
 ### ⚠️ En cours
+- Phase 3 : Authentification et sessions
+  - ✅ Phase 3.1 : Configuration des sessions (complétée)
+  - ❌ Phase 3.2 : Sécurité des mots de passe (validation forte)
+  - ❌ Phase 3.3 : Routes d'authentification (register, login, logout, me)
+  - ❌ Phase 3.4 : Middlewares d'authentification
 - Phase 5.2 : Routes Projets
   - ✅ POST /projets (avec création AnimateurProjet)
   - ✅ GET /projets
@@ -339,7 +353,9 @@
   - ❌ Reste à faire : PUT/:id, DELETE/:id
 
 ### ❌ À faire
-- Phase 3 : Authentification et sessions
+- Phase 3.2 : Sécurité des mots de passe (validation forte)
+- Phase 3.3 : Routes d'authentification (register, login, logout, me)
+- Phase 3.4 : Middlewares d'authentification
 - Phase 4 : Validations globales
 - Phase 5.2 : Routes Projets (PUT/:id, DELETE/:id)
 - Phase 5.3 : Routes AnimateurProjet (PUT/:animateur_id, DELETE/:animateur_id)
