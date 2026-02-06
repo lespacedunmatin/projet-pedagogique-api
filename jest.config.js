@@ -9,4 +9,7 @@ module.exports = {
   maxWorkers: 1,
   // Augmenter le timeout pour les opérations de base de données
   testTimeout: 10000,
+  // Sauvegarder la BD avant les tests et la restaurer après (activé par défaut)
+  globalSetup: '<rootDir>/tests/setup.js',
+  globalTeardown: '<rootDir>/tests/teardown.js',
 };

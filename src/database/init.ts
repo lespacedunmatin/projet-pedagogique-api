@@ -52,6 +52,7 @@ async function createAppUser() {
     console.warn('⚠️  Impossible de créer l\'utilisateur automatiquement');
     console.warn('   Vous devrez l\'exécuter manuellement avec: mysql -u root -p < sql/00_create_user.sql');
     console.warn('   Détail erreur:', error.message);
+
     await rootSequelize.close();
     return false;
   }
@@ -105,10 +106,14 @@ async function initializeDatabase() {
     console.log('✓ Modèles synchronisés');
 
     console.log('✓ Initialisation de la base de données réussie\n');
+
+    await sequelize.close();
     process.exit(0);
   } catch (error) {
     console.error('\n✗ Erreur lors de l\'initialisation:', error);
     console.error('\nConsultez DATABASE_SETUP.md pour plus d\'informations sur la configuration.\n');
+
+    await sequelize.close();
     process.exit(1);
   }
 }
