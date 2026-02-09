@@ -4,9 +4,11 @@ import Projet from '../src/models/Projet';
 import Animateur from '../src/models/Animateur';
 import AnimateurProjet from '../src/models/AnimateurProjet';
 import bcrypt from 'bcrypt';
+import { getAuthenticatedSession } from './helpers';
 
 describe('POST /projets', () => {
   let animateurId: string;
+  let sessionCookie: string;
 
   beforeEach(async () => {
     // Créer un animateur de test
@@ -16,6 +18,9 @@ describe('POST /projets', () => {
       nom: 'Test Animateur',
     });
     animateurId = animateur.id;
+
+    // Établir une session authentifiée
+    sessionCookie = await getAuthenticatedSession(animateurId, 'password123');
   });
 
   afterEach(async () => {
@@ -37,6 +42,7 @@ describe('POST /projets', () => {
 
     const response = await request(app)
       .post('/projets')
+      .set('cookie', sessionCookie)
       .send(projetData)
       .expect(201);
 
@@ -66,6 +72,7 @@ describe('POST /projets', () => {
 
     const response = await request(app)
       .post('/projets')
+      .set('cookie', sessionCookie)
       .send(projetData)
       .expect(201);
 
@@ -80,6 +87,7 @@ describe('POST /projets', () => {
 
     const response = await request(app)
       .post('/projets')
+      .set('cookie', sessionCookie)
       .send(projetData)
       .expect(400);
 
@@ -93,6 +101,7 @@ describe('POST /projets', () => {
 
     const response = await request(app)
       .post('/projets')
+      .set('cookie', sessionCookie)
       .send(projetData)
       .expect(400);
 
@@ -107,6 +116,7 @@ describe('POST /projets', () => {
 
     const response = await request(app)
       .post('/projets')
+      .set('cookie', sessionCookie)
       .send(projetData)
       .expect(404);
 
@@ -127,6 +137,7 @@ describe('POST /projets', () => {
 
     const response = await request(app)
       .post('/projets')
+      .set('cookie', sessionCookie)
       .send(projetData)
       .expect(404);
 
@@ -143,6 +154,7 @@ describe('POST /projets', () => {
 
     const response = await request(app)
       .post('/projets')
+      .set('cookie', sessionCookie)
       .send(projetData)
       .expect(400);
 
@@ -152,6 +164,7 @@ describe('POST /projets', () => {
 
 describe('GET /projets', () => {
   let animateurId: string;
+  let sessionCookie: string;
   let projetIds: string[] = [];
 
   beforeEach(async () => {
@@ -162,6 +175,9 @@ describe('GET /projets', () => {
       nom: 'Test Animateur',
     });
     animateurId = animateur.id;
+
+    // Établir une session authentifiée
+    sessionCookie = await getAuthenticatedSession(animateurId, 'password123');
 
     // Créer quelques projets de test
     const projets = [
@@ -194,6 +210,7 @@ describe('GET /projets', () => {
   it('devrait récupérer la liste de tous les projets', async () => {
     const response = await request(app)
       .get('/projets')
+      .set('cookie', sessionCookie)
       .expect(200);
 
     expect(response.body.count).toBe(3);
@@ -210,6 +227,7 @@ describe('GET /projets', () => {
 
     const response = await request(app)
       .get('/projets')
+      .set('cookie', sessionCookie)
       .expect(200);
 
     expect(response.body.count).toBe(2);
@@ -221,10 +239,11 @@ describe('GET /projets', () => {
 
   it('devrait retourner un tableau vide si aucun projet n\'existe', async () => {
     // Supprimer tous les projets
-    await Projet.destroy({ where: { id: projetIds }, force: true });
+    await Projet.destroy({ where: {}, force: true });
 
     const response = await request(app)
       .get('/projets')
+      .set('cookie', sessionCookie)
       .expect(200);
 
     expect(response.body.count).toBe(0);

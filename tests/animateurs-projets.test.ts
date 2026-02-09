@@ -4,10 +4,12 @@ import Projet from '../src/models/Projet';
 import Animateur from '../src/models/Animateur';
 import AnimateurProjet from '../src/models/AnimateurProjet';
 import bcrypt from 'bcrypt';
+import { getAuthenticatedSession } from './helpers';
 
 describe('POST /projets/:id/animateurs', () => {
   let projetId: string;
   let animateur1Id: string;
+  let sessionCookie: string;
 
   beforeEach(async () => {
     // Créer un animateur de test
@@ -30,6 +32,9 @@ describe('POST /projets/:id/animateurs', () => {
       projet_id: projetId,
       role: 'coordinateur',
     });
+
+    // Établir une session authentifiée
+    sessionCookie = await getAuthenticatedSession(animateur1Id, 'password123');
   });
 
   afterEach(async () => {
@@ -49,6 +54,7 @@ describe('POST /projets/:id/animateurs', () => {
 
     const response = await request(app)
       .post(`/projets/${projetId}/animateurs`)
+      .set('cookie', sessionCookie)
       .send({
         email: animateur2.email,
         role: 'assistant',
@@ -74,6 +80,7 @@ describe('POST /projets/:id/animateurs', () => {
 
     const response = await request(app)
       .post(`/projets/${projetId}/animateurs`)
+      .set('cookie', sessionCookie)
       .send({
         email: animateur2.email,
       })
@@ -88,6 +95,7 @@ describe('POST /projets/:id/animateurs', () => {
   it('devrait retourner une erreur 400 si l\'email est manquant', async () => {
     const response = await request(app)
       .post(`/projets/${projetId}/animateurs`)
+      .set('cookie', sessionCookie)
       .send({})
       .expect(400);
 
@@ -96,7 +104,8 @@ describe('POST /projets/:id/animateurs', () => {
 
   it('devrait retourner une erreur 404 si le projet n\'existe pas', async () => {
     const response = await request(app)
-      .post(`/projets/550e8400-e29b-41d4-a716-446655440999/animateurs`)
+      .post(`/projets/00000000-0000-0000-0000-000000000000/animateurs`)
+      .set('cookie', sessionCookie)
       .send({
         email: 'test@example.com',
       })
@@ -108,8 +117,9 @@ describe('POST /projets/:id/animateurs', () => {
   it('devrait retourner une erreur 404 si l\'animateur n\'existe pas', async () => {
     const response = await request(app)
       .post(`/projets/${projetId}/animateurs`)
+      .set('cookie', sessionCookie)
       .send({
-        email: 'inexistant@example.com',
+        email: 'nonexistent@example.com',
       })
       .expect(404);
 
@@ -132,6 +142,7 @@ describe('POST /projets/:id/animateurs', () => {
 
     const response = await request(app)
       .post(`/projets/${projetId}/animateurs`)
+      .set('cookie', sessionCookie)
       .send({
         email: animateur2.email,
       })
@@ -155,6 +166,7 @@ describe('POST /projets/:id/animateurs', () => {
 
     const response = await request(app)
       .post(`/projets/${projetId}/animateurs`)
+      .set('cookie', sessionCookie)
       .send({
         email: animateur2.email,
       })
@@ -179,6 +191,7 @@ describe('POST /projets/:id/animateurs', () => {
 
     const response = await request(app)
       .post(`/projets/${projetId}/animateurs`)
+      .set('cookie', sessionCookie)
       .send({
         email: animateur2.email,
       })
@@ -195,20 +208,21 @@ describe('GET /projets/:projet_id/animateurs', () => {
   let projetId: string;
   let animateur1Id: string;
   let animateur2Id: string;
+  let sessionCookie: string;
 
   beforeEach(async () => {
     // Créer deux animateurs
     const animateur1 = await Animateur.create({
       email: `test1-${Date.now()}@example.com`,
       password: await bcrypt.hash('password123', 10),
-      nom: 'Animateur 1',
+      nom: 'Test Animateur 1',
     });
     animateur1Id = animateur1.id;
 
     const animateur2 = await Animateur.create({
       email: `test2-${Date.now()}@example.com`,
       password: await bcrypt.hash('password456', 10),
-      nom: 'Animateur 2',
+      nom: 'Test Animateur 2',
     });
     animateur2Id = animateur2.id;
 
@@ -226,10 +240,13 @@ describe('GET /projets/:projet_id/animateurs', () => {
     });
 
     await AnimateurProjet.create({
-      animateur_id: animateur2Id,
+      animateur_id: animateur2.id,
       projet_id: projetId,
       role: 'assistant',
     });
+
+    // Établir une session authentifiée
+    sessionCookie = await getAuthenticatedSession(animateur1Id, 'password123');
   });
 
   afterEach(async () => {
@@ -243,6 +260,7 @@ describe('GET /projets/:projet_id/animateurs', () => {
   it('devrait retourner la liste des animateurs du projet sans détails', async () => {
     const response = await request(app)
       .get(`/projets/${projetId}/animateurs`)
+      .set('cookie', sessionCookie)
       .expect(200);
 
     expect(response.body.projet_id).toBe(projetId);
@@ -268,6 +286,7 @@ describe('GET /projets/:projet_id/animateurs', () => {
 
     const response = await request(app)
       .get(`/projets/${projetVide.id}/animateurs`)
+      .set('cookie', sessionCookie)
       .expect(200);
 
     expect(response.body.projet_id).toBe(projetVide.id);
@@ -280,7 +299,8 @@ describe('GET /projets/:projet_id/animateurs', () => {
 
   it('devrait retourner 404 si le projet n\'existe pas', async () => {
     const response = await request(app)
-      .get(`/projets/550e8400-e29b-41d4-a716-446655440999/animateurs`)
+      .get(`/projets/00000000-0000-0000-0000-000000000000/animateurs`)
+      .set('cookie', sessionCookie)
       .expect(404);
 
     expect(response.body.error).toBe('Projet non trouvé');
@@ -292,6 +312,7 @@ describe('GET /projets/:projet_id/animateurs', () => {
 
     const response = await request(app)
       .get(`/projets/${projetId}/animateurs`)
+      .set('cookie', sessionCookie)
       .expect(404);
 
     expect(response.body.error).toBe('Projet non trouvé');
@@ -303,6 +324,7 @@ describe('GET /projets/:projet_id/animateurs', () => {
 
     const response = await request(app)
       .get(`/projets/${projetId}/animateurs?with=details`)
+      .set('cookie', sessionCookie)
       .expect(200);
 
     // Devrait retourner seulement animateur2
@@ -321,6 +343,7 @@ describe('GET /projets/:projet_id/animateurs', () => {
 
     const response = await request(app)
       .get(`/projets/${projetId}/animateurs`)
+      .set('cookie', sessionCookie)
       .expect(200);
 
     // Devrait retourner seulement animateur2

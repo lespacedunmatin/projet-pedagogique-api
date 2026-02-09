@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import Animateur from '../models/Animateur';
 import AnimateurProjet from '../models/AnimateurProjet';
 import Projet from '../models/Projet';
+import { isAuthenticated } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -62,6 +63,9 @@ router.post('/', async (req: Request, res: Response) => {
     });
   }
 });
+
+// Appliquer le middleware d'authentification à toutes les routes sauf POST /animateurs
+router.use(isAuthenticated);
 
 /**
  * GET /animateurs

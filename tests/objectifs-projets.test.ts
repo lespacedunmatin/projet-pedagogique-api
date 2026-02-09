@@ -5,10 +5,12 @@ import Animateur from '../src/models/Animateur';
 import AnimateurProjet from '../src/models/AnimateurProjet';
 import Objectif from '../src/models/Objectif';
 import bcrypt from 'bcrypt';
+import { getAuthenticatedSession } from './helpers';
 
 describe('POST /projets/:projet_id/objectifs', () => {
   let animateurId: string;
   let projetId: string;
+  let sessionCookie: string;
 
   beforeEach(async () => {
     // Créer un animateur de test
@@ -34,6 +36,9 @@ describe('POST /projets/:projet_id/objectifs', () => {
       projet_id: projetId,
       role: 'coordinateur',
     });
+
+    // Établir une session authentifiée
+    sessionCookie = await getAuthenticatedSession(animateurId, 'password123');
   });
 
   afterEach(async () => {
@@ -53,6 +58,7 @@ describe('POST /projets/:projet_id/objectifs', () => {
 
     const response = await request(app)
       .post(`/projets/${projetId}/objectifs`)
+      .set('cookie', sessionCookie)
       .send(objectifData)
       .expect(201);
 
@@ -73,6 +79,7 @@ describe('POST /projets/:projet_id/objectifs', () => {
 
     const response = await request(app)
       .post(`/projets/${projetId}/objectifs`)
+      .set('cookie', sessionCookie)
       .send(objectifData)
       .expect(201);
 
@@ -87,6 +94,7 @@ describe('POST /projets/:projet_id/objectifs', () => {
 
     const response = await request(app)
       .post(`/projets/${projetId}/objectifs`)
+      .set('cookie', sessionCookie)
       .send(objectifData)
       .expect(400);
 
@@ -101,6 +109,7 @@ describe('POST /projets/:projet_id/objectifs', () => {
 
     const response = await request(app)
       .post(`/projets/${projetId}/objectifs`)
+      .set('cookie', sessionCookie)
       .send(objectifData)
       .expect(400);
 
@@ -116,6 +125,7 @@ describe('POST /projets/:projet_id/objectifs', () => {
 
     const response = await request(app)
       .post(`/projets/${fakeProjetId}/objectifs`)
+      .set('cookie', sessionCookie)
       .send(objectifData)
       .expect(404);
 
@@ -131,6 +141,7 @@ describe('POST /projets/:projet_id/objectifs', () => {
 
     const response = await request(app)
       .post(`/projets/${projetId}/objectifs`)
+      .set('cookie', sessionCookie)
       .send(objectifData)
       .expect(404);
 
@@ -152,6 +163,7 @@ describe('POST /projets/:projet_id/objectifs', () => {
 
     const response = await request(app)
       .post(`/projets/${projetId}/objectifs`)
+      .set('cookie', sessionCookie)
       .send(objectifData)
       .expect(403);
 
@@ -172,6 +184,7 @@ describe('POST /projets/:projet_id/objectifs', () => {
 
     const response = await request(app)
       .post(`/projets/${projetId}/objectifs`)
+      .set('cookie', sessionCookie)
       .send(objectifData)
       .expect(404);
 
@@ -189,6 +202,7 @@ describe('POST /projets/:projet_id/objectifs', () => {
 
     const response = await request(app)
       .post(`/projets/${projetId}/objectifs`)
+      .set('cookie', sessionCookie)
       .send(objectifData)
       .expect(404);
 
@@ -200,6 +214,7 @@ describe('GET /projets/:projet_id/objectifs', () => {
   let animateur1Id: string;
   let animateur2Id: string;
   let projetId: string;
+  let sessionCookie: string;
 
   beforeEach(async () => {
     // Créer deux animateurs
@@ -209,6 +224,9 @@ describe('GET /projets/:projet_id/objectifs', () => {
       nom: 'Animateur 1',
     });
     animateur1Id = animateur1.id;
+
+    // Établir une session authentifiée pour l'animateur 1
+    sessionCookie = await getAuthenticatedSession(animateur1Id, 'password123');
 
     const animateur2 = await Animateur.create({
       email: `test2-${Date.now()}@example.com`,
@@ -274,6 +292,7 @@ describe('GET /projets/:projet_id/objectifs', () => {
   it('devrait récupérer la liste des objectifs d\'un projet', async () => {
     const response = await request(app)
       .get(`/projets/${projetId}/objectifs`)
+      .set('cookie', sessionCookie)
       .expect(200);
 
     expect(response.body.projet_id).toBe(projetId);
@@ -295,6 +314,7 @@ describe('GET /projets/:projet_id/objectifs', () => {
 
     const response = await request(app)
       .get(`/projets/${projetVide.id}/objectifs`)
+      .set('cookie', sessionCookie)
       .expect(200);
 
     expect(response.body.projet_id).toBe(projetVide.id);
@@ -308,6 +328,7 @@ describe('GET /projets/:projet_id/objectifs', () => {
   it('devrait retourner 404 si le projet n\'existe pas', async () => {
     const response = await request(app)
       .get(`/projets/00000000-0000-0000-0000-000000000000/objectifs`)
+      .set('cookie', sessionCookie)
       .expect(404);
 
     expect(response.body.error).toBe('Projet non trouvé');
@@ -319,6 +340,7 @@ describe('GET /projets/:projet_id/objectifs', () => {
 
     const response = await request(app)
       .get(`/projets/${projetId}/objectifs`)
+      .set('cookie', sessionCookie)
       .expect(404);
 
     expect(response.body.error).toBe('Projet non trouvé');
@@ -327,6 +349,7 @@ describe('GET /projets/:projet_id/objectifs', () => {
   it('devrait charger les détails complets quand with=details', async () => {
     const response = await request(app)
       .get(`/projets/${projetId}/objectifs?with=details`)
+      .set('cookie', sessionCookie)
       .expect(200);
 
     expect(response.body.count).toBe(3);
@@ -354,6 +377,7 @@ describe('GET /projets/:projet_id/objectifs', () => {
 
     const response = await request(app)
       .get(`/projets/${projetId}/objectifs`)
+      .set('cookie', sessionCookie)
       .expect(200);
 
     expect(response.body.count).toBe(2);
@@ -371,6 +395,7 @@ describe('GET /projets/:projet_id/objectifs', () => {
 
     const response = await request(app)
       .get(`/projets/${projetId}/objectifs?with=details`)
+      .set('cookie', sessionCookie)
       .expect(200);
 
     // Devrait retourner tous les objectifs, y compris ceux créés par l'animateur supprimé
@@ -404,6 +429,7 @@ describe('GET /projets/:projet_id/objectifs', () => {
 
     const response = await request(app)
       .get(`/projets/${projetId}/objectifs`)
+      .set('cookie', sessionCookie)
       .expect(200);
 
     expect(response.body.count).toBe(4);

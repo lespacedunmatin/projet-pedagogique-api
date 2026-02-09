@@ -93,10 +93,32 @@
 - [ ] Créer un utilitaire de validation des mots de passe (12 char min + 3 types)
 
 ### 3.3 Routes d'authentification
-- [ ] POST `/auth/register` - Inscription
-- [ ] POST `/auth/login` - Connexion
+- [x] POST `/auth/register` - Inscription
+  - [x] Validation des paramètres (email, mot de passe, nom)
+  - [x] Vérification de l'unicité de l'email
+  - [x] Validation du format email
+  - [x] Validation de la force du mot de passe
+  - [x] Hachage du mot de passe
+  - [x] Création de la session
+  - [x] Tests complets (12 tests)
+- [x] POST `/auth/login` - Connexion
+  - [x] Validation des paramètres (email, mot de passe)
+  - [x] Recherche de l'animateur par email
+  - [x] Vérification du mot de passe avec bcrypt
+  - [x] Vérification que l'animateur n'est pas supprimé
+  - [x] Création de la session
+  - [x] Tests complets (9 tests)
 - [ ] POST `/auth/logout` - Déconnexion
 - [ ] GET `/auth/me` - Profil utilisateur
+
+### 3.4 Authentification globale
+- [x] Middleware `isAuthenticated` appliqué à toutes les routes (sauf `/status` et `/auth`)
+  - [x] Routes `/animateurs`
+  - [x] Routes `/projets` et sous-routes
+  - [x] Routes `/projets/:id/objectifs`
+  - [x] Routes `/projets/:id/activites`
+  - [x] Route `/status` accessible sans authentification
+  - [x] Routes `/auth` accessible sans authentification
 
 ### 3.4 Middlewares d'authentification
 - [ ] Middleware `isAuthenticated` (vérifier la session)
@@ -345,6 +367,10 @@
   - Inscription avec validation
   - Établissement de la session
   - Création de l'animateur
+- Phase 3.3 : Route POST /auth/login (9 tests)
+  - Connexion avec validation
+  - Vérification du mot de passe
+  - Établissement de la session
 - Phase 5.1 : Routes complètes pour Animateurs
   - POST /animateurs
   - GET /animateurs (avec paramètre id_projet)
@@ -356,8 +382,9 @@
 - Phase 3 : Authentification et sessions
   - ✅ Phase 3.1 : Configuration des sessions (complétée)
   - ✅ Phase 3.2 : Sécurité des mots de passe (complétée)
-  - ✅ Phase 3.3 : Route POST /auth/register (complétée)
-  - ❌ Phase 3.4 : Routes POST /auth/login, POST /auth/logout, GET /auth/me
+  - ✅ Phase 3.3 : Routes POST /auth/register et POST /auth/login (complétées)
+  - ✅ Phase 3.4 : Authentification globale sur toutes les routes (complétée)
+  - ❌ Phase 3.5 : Routes POST /auth/logout et GET /auth/me
 - Phase 5.2 : Routes Projets
   - ✅ POST /projets (avec création AnimateurProjet)
   - ✅ GET /projets

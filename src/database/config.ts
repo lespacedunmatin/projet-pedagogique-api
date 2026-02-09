@@ -14,8 +14,11 @@ const sequelize = new Sequelize({
   pool: {
     max: 5,
     min: 0,
-    acquire: 30000,
-    idle: 10000,
+    acquire: 60000, // 60 secondes pour acquérir une connexion
+    idle: 30000,    // 30 secondes avant de libérer une connexion idle
+  },
+  dialectOptions: {
+    connectTimeout: 10000, // 10 secondes pour se connecter
   },
 });
 

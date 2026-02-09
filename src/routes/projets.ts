@@ -6,8 +6,12 @@ import projetDetailsRouter from './projets-details';
 import animateursProjetRouter from './animateurs-projets';
 import objectifsProjetRouter from './objectifs-projets';
 import activitesProjetRouter from './activites-projets';
+import { isAuthenticated } from '../middleware/auth';
 
 const router = express.Router();
+
+// Appliquer le middleware d'authentification à toutes les routes
+router.use(isAuthenticated);
 
 /**
  * POST /projets

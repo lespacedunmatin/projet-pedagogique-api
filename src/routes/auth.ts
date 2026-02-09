@@ -143,4 +143,76 @@ function validatePasswordStrength(password: string): {
   return { isValid, requirements };
 }
 
+/**
+ * POST /auth/login
+ * Authentifie un animateur et établit une session
+ * Body: {
+ *   email: string (adresse email),
+ *   password: string (mot de passe)
+ * }
+ */
+router.post('/login', isNotAuthenticated, async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validation des paramètres obligatoires
+    if (!email) {
+      return res.status(400).json({ error: 'L\'email est obligatoire' });
+    }
+
+    if (!password) {
+      return res.status(400).json({ error: 'Le mot de passe est obligatoire' });
+    }
+
+    // Rechercher l'animateur par email
+    const animateur = await Animateur.findOne({
+      where: { email: email.toLowerCase() },
+    });
+
+    // Vérifier que l'animateur existe et n'est pas supprimé
+    if (!animateur || animateur.deleted_at !== null) {
+      return res.status(401).json({
+        error: 'Email ou mot de passe incorrect',
+      });
+    }
+
+    // Vérifier le mot de passe
+    const passwordMatch = await bcrypt.compare(password, animateur.password);
+    if (!passwordMatch) {
+      return res.status(401).json({
+        error: 'Email ou mot de passe incorrect',
+      });
+    }
+
+    // Établir la session
+    (req.session as any).userId = animateur.id;
+    (req.session as any).userEmail = animateur.email;
+    (req.session as any).userName = animateur.nom;
+    (req.session as any).authenticated = true;
+
+    // Sauvegarder la session
+    req.session.save((error: any) => {
+      if (error) {
+        console.error('Erreur lors de la sauvegarde de la session:', error);
+        return res.status(500).json({ error: 'Erreur lors de la création de la session' });
+      }
+
+      return res.status(200).json({
+        message: 'Connexion réussie',
+        animateur: {
+          id: animateur.id,
+          email: animateur.email,
+          nom: animateur.nom,
+          created_at: animateur.created_at,
+        },
+      });
+    });
+  } catch (error) {
+    console.error('Erreur lors de la connexion:', error);
+    return res.status(500).json({
+      error: 'Erreur serveur lors de la connexion',
+    });
+  }
+});
+
 export default router;

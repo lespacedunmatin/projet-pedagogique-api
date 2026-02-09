@@ -2,8 +2,12 @@ import express, { Request, Response } from 'express';
 import Projet from '../models/Projet';
 import AnimateurProjet from '../models/AnimateurProjet';
 import Animateur from '../models/Animateur';
+import { isAuthenticated } from '../middleware/auth';
 
 const router = express.Router();
+
+// Appliquer le middleware d'authentification à toutes les routes
+router.use(isAuthenticated);
 
 /**
  * POST /projets/:id/animateurs

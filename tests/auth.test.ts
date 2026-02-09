@@ -1,6 +1,7 @@
 import request from 'supertest';
 import app from '../src/server';
 import Animateur from '../src/models/Animateur';
+import bcrypt from "bcrypt";
 
 describe('POST /auth/register', () => {
   afterEach(async () => {
@@ -283,3 +284,155 @@ describe('POST /auth/register', () => {
     expect(response.body.animateur.id).toBeDefined();
   });
 });
+
+describe('POST /auth/login', () => {
+  let animateurId: string;
+  const password = 'SecurePass123!';
+  const email = 'login-test@example.com';
+
+  beforeEach(async () => {
+    // Créer un animateur pour les tests de login
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const animateur = await Animateur.create({
+      email,
+      password: hashedPassword,
+      nom: 'Test Login User',
+    });
+    animateurId = animateur.id;
+  });
+
+  afterEach(async () => {
+    // Nettoyer les données créées
+    await Animateur.destroy({ where: {} });
+  });
+
+  it('devrait connecter un utilisateur avec succès', async () => {
+    const response = await request(app)
+      .post('/auth/login')
+      .send({
+        email,
+        password,
+      })
+      .expect(200);
+
+    expect(response.body.message).toBe('Connexion réussie');
+    expect(response.body.animateur).toBeDefined();
+    expect(response.body.animateur.id).toBe(animateurId);
+    expect(response.body.animateur.email).toBe(email);
+    expect(response.body.animateur.password).toBeUndefined();
+
+    // Vérifier que la session est établie
+    expect(response.headers['set-cookie']).toBeDefined();
+  });
+
+  it('devrait retourner 400 si l\'email est manquant', async () => {
+    const response = await request(app)
+      .post('/auth/login')
+      .send({
+        password,
+      })
+      .expect(400);
+
+    expect(response.body.error).toBe('L\'email est obligatoire');
+  });
+
+  it('devrait retourner 400 si le mot de passe est manquant', async () => {
+    const response = await request(app)
+      .post('/auth/login')
+      .send({
+        email,
+      })
+      .expect(400);
+
+    expect(response.body.error).toBe('Le mot de passe est obligatoire');
+  });
+
+  it('devrait retourner 401 si l\'email n\'existe pas', async () => {
+    const response = await request(app)
+      .post('/auth/login')
+      .send({
+        email: 'nonexistent@example.com',
+        password,
+      })
+      .expect(401);
+
+    expect(response.body.error).toBe('Email ou mot de passe incorrect');
+  });
+
+  it('devrait retourner 401 si le mot de passe est incorrect', async () => {
+    const response = await request(app)
+      .post('/auth/login')
+      .send({
+        email,
+        password: 'WrongPassword123!',
+      })
+      .expect(401);
+
+    expect(response.body.error).toBe('Email ou mot de passe incorrect');
+  });
+
+  it('devrait retourner 401 si l\'utilisateur est supprimé', async () => {
+    // Supprimer l'utilisateur
+    await Animateur.update({ deleted_at: new Date() }, { where: { id: animateurId } });
+
+    const response = await request(app)
+      .post('/auth/login')
+      .send({
+        email,
+        password,
+      })
+      .expect(401);
+
+    expect(response.body.error).toBe('Email ou mot de passe incorrect');
+  });
+
+  it('devrait accepter les emails en majuscules et les normaliser', async () => {
+    const response = await request(app)
+      .post('/auth/login')
+      .send({
+        email: email.toUpperCase(),
+        password,
+      })
+      .expect(200);
+
+    expect(response.body.message).toBe('Connexion réussie');
+    expect(response.body.animateur.id).toBe(animateurId);
+  });
+
+  it('devrait retourner 400 si l\'utilisateur est déjà authentifié', async () => {
+    // Créer une première session
+    const firstResponse = await request(app)
+      .post('/auth/login')
+      .send({
+        email,
+        password,
+      })
+      .expect(200);
+
+    // Essayer de se connecter à nouveau avec la même session
+    const secondResponse = await request(app)
+      .post('/auth/login')
+      .set('cookie', firstResponse.headers['set-cookie'][0])
+      .send({
+        email,
+        password,
+      })
+      .expect(400);
+
+    expect(secondResponse.body.error).toBe('Vous êtes déjà connecté');
+  });
+
+  it('ne devrait pas retourner le mot de passe en réponse', async () => {
+    const response = await request(app)
+      .post('/auth/login')
+      .send({
+        email,
+        password,
+      })
+      .expect(200);
+
+    expect(response.body.animateur.password).toBeUndefined();
+    expect(JSON.stringify(response.body)).not.toContain('SecurePass');
+  });
+});
+

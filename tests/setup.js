@@ -16,14 +16,41 @@ function getDbCredentials() {
   };
 }
 
+function checkDbConnection() {
+  try {
+    const { user, password, host, database } = getDbCredentials();
+    // Tester la connexion à la base de données
+    const command = `mysql -u${user} -p"${password}" -h${host} -e "SELECT 1" ${database} 2>/dev/null`;
+    execSync(command, { timeout: 5000 });
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 async function globalSetup() {
+  console.log('\n📋 Initialisation des tests…');
+
+  // Vérifier que la base de données est disponible
+  let retries = 3;
+  while (retries > 0 && !checkDbConnection()) {
+    console.log(`⏳ Attente de la base de données… (${retries} tentatives restantes)`);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    retries--;
+  }
+
+  if (!checkDbConnection()) {
+    console.warn('⚠️ La base de données n\'est pas disponible. Les tests vont continuer sans sauvegarde.');
+    return;
+  }
+
   // La sauvegarde est optionnelle - elle nécessite mysqldump installé
   if (!BACKUP_ENABLED) {
     return;
   }
 
   try {
-    console.log('\n📦 Sauvegarde de la base de données…');
+    console.log('📦 Sauvegarde de la base de données…');
 
     // Créer le répertoire de sauvegarde
     if (!fs.existsSync(BACKUP_DIR)) {
@@ -57,12 +84,12 @@ async function globalTeardown() {
       return;
     }
 
-    console.log('\n📥 Restauration de la base de données...');
+    console.log('\n📥 Restauration de la base de données…');
 
     const { user, password, host, database } = getDbCredentials();
 
     // Supprimer et recréer la base de données
-    const createCommand = `mysql -u${user} -p${password} -h${host} -e "DROP DATABASE IF EXISTS ${database}; CREATE DATABASE ${database} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null`;
+    const createCommand = `mysql -u${user} -p"${password}" -h${host} -e "DROP DATABASE IF EXISTS ${database}; CREATE DATABASE ${database} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null`;
     execSync(createCommand, {
       stdio: 'pipe',
       timeout: 30000,
@@ -70,7 +97,7 @@ async function globalTeardown() {
     });
 
     // Restaurer la sauvegarde
-    const restoreCommand = `mysql -u${user} -p${password} -h${host} ${database} < ${BACKUP_FILE} 2>/dev/null`;
+    const restoreCommand = `mysql -u${user} -p"${password}" -h${host} ${database} < ${BACKUP_FILE} 2>/dev/null`;
     execSync(restoreCommand, {
       stdio: 'pipe',
       timeout: 60000,

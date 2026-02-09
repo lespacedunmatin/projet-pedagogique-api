@@ -4,9 +4,11 @@ import Projet from '../src/models/Projet';
 import Animateur, { AnimateurCreationAttributes } from '../src/models/Animateur';
 import AnimateurProjet from '../src/models/AnimateurProjet';
 import bcrypt from 'bcrypt';
+import { getAuthenticatedSession } from './helpers';
 
 describe('GET /projets/:id', () => {
   let projetId: string;
+  let sessionCookie: string;
   const animateur1Data: AnimateurCreationAttributes = {
     email: `test1-${Date.now()}@example.com`,
     password: 'p@ssw0rd123',
@@ -46,6 +48,9 @@ describe('GET /projets/:id', () => {
     });
     animateur1Data.id = animateur.id;
 
+    // Établir une session authentifiée
+    sessionCookie = await getAuthenticatedSession(animateur1Data.id as string, 'p@ssw0rd123');
+
     // Créer un projet de test
     const projet = await Projet.create({
       nom: 'Projet Test',
@@ -68,9 +73,10 @@ describe('GET /projets/:id', () => {
     await Animateur.destroy({ where: { id: animateur1Data.id }, force: true });
   });
 
-  it('devrait récupérer les détails d\'un projet', async () => {
+  it('devrait retourner les détails d\'un projet avec ses animateurs', async () => {
     const response = await request(app)
       .get(`/projets/${projetId}`)
+      .set('cookie', sessionCookie)
       .expect(200);
 
     expect(response.body.projet).toBeDefined();
@@ -83,9 +89,10 @@ describe('GET /projets/:id', () => {
   });
 
   it('devrait retourner une erreur 404 si le projet n\'existe pas', async () => {
-    const fakeId = '550e8400-e29b-41d4-a716-446655440999';
+    const fakeId = '550e8400-e29b-41d4-a716-446655440000';
     const response = await request(app)
       .get(`/projets/${fakeId}`)
+      .set('cookie', sessionCookie)
       .expect(404);
 
     expect(response.body.error).toBe('Projet non trouvé');
@@ -97,6 +104,7 @@ describe('GET /projets/:id', () => {
 
     const response = await request(app)
       .get(`/projets/${projetId}`)
+      .set('cookie', sessionCookie)
       .expect(404);
 
     expect(response.body.error).toBe('Projet non trouvé');
@@ -114,6 +122,7 @@ describe('GET /projets/:id', () => {
 
     const response = await request(app)
       .get(`/projets/${projetId}`)
+      .set('cookie', sessionCookie)
       .expect(200);
 
     expect(response.body.animateurs.length).toBe(1);
@@ -126,6 +135,7 @@ describe('GET /projets/:id', () => {
   it('devrait retourner les animateurs avec détails complets quand with=animateurs', async () => {
     const response = await request(app)
       .get(`/projets/${projetId}?with=animateurs`)
+      .set('cookie', sessionCookie)
       .expect(200);
 
     expect(response.body.projet).toBeDefined();
@@ -152,6 +162,7 @@ describe('GET /projets/:id', () => {
 
     const response = await request(app)
       .get(`/projets/${projetId}?with=animateurs`)
+      .set('cookie', sessionCookie)
       .expect(200);
 
     expect(response.body.animateurs.length).toBe(2);
@@ -179,6 +190,7 @@ describe('GET /projets/:id', () => {
 
     const response = await request(app)
       .get(`/projets/${projetId}?with=animateurs`)
+      .set('cookie', sessionCookie)
       .expect(200);
 
     expect(response.body.animateurs.length).toBe(1);
@@ -200,6 +212,7 @@ describe('GET /projets/:id', () => {
 
     const response = await request(app)
       .get(`/projets/${projetId}?with=animateurs`)
+      .set('cookie', sessionCookie)
       .expect(200);
 
     expect(response.body.animateurs.length).toBe(1);
@@ -212,6 +225,7 @@ describe('GET /projets/:id', () => {
   it('devrait retourner les liaisons seulement sans détails d\'animateurs par défaut', async () => {
     const response = await request(app)
       .get(`/projets/${projetId}`)
+      .set('cookie', sessionCookie)
       .expect(200);
 
     expect(response.body.animateurs).toBeInstanceOf(Array);
