@@ -42,13 +42,28 @@ npm start
 
 ## 📚 Documentation
 
-### 📖 Spécifications de l'API
+### 🎯 Guide de Consommation de l'API (Pour Développeurs et Agents IA)
+
+Consultez [**API_PROJET_PEDAGOGIQUE.md**](./API_PROJET_PEDAGOGIQUE.md) pour :
+- **Guide complet** pour développer un client consommant l'API
+- Configuration et authentification
+- Tous les endpoints avec exemples détaillés
+- Patterns et bonnes pratiques de développement
+- Gestion des erreurs et codes HTTP
+- Exemples de flux métier complets
+- Hooks React recommandés
+- Checklist pour développeurs
+- **Optimisé pour le développement assisté par IA**
+
+### 📖 Spécifications Techniques de l'API
 
 Consultez [**api-pedagogique-specs.md**](./api-pedagogique-specs.md) pour :
 - Tous les endpoints disponibles
-- Les modèles de données
+- Les modèles de données (Animateur, Projet, Objectif, Activité, etc.)
 - Les codes de statut HTTP
+- Les règles métier et validations
 - Les exemples de requêtes/réponses
+- Évolutions futures possibles
 
 ### 🗂️ Installation et Configuration de la Base de Données
 
