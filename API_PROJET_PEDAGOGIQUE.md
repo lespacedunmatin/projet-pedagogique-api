@@ -50,16 +50,20 @@ L'API est accessible via :
 ### 1.2. Variables d'Environnement à Configurer
 
 ```env
-# API
-API_BASE_URL=http://localhost:3000/api
-NODE_ENV=development
-
-# Si développement local
+# Base de données
 DB_HOST=localhost
 DB_PORT=3306
 DB_USER=app_projet_peda
 DB_PASSWORD=votre_mot_de_passe
 DB_NAME=projet_pedagogique
+
+# Application
+NODE_ENV=development
+PORT=3000
+SESSION_SECRET=votre_clé_secrète_sécurisée
+
+# CORS - Origines autorisées (séparées par des virgules)
+CORS_ORIGIN=http://localhost:3000,http://localhost:4200,http://localhost:3001
 ```
 
 ### 1.3. Démarrage de l'API
@@ -78,7 +82,64 @@ npm start
 npm run dev
 ```
 
+### 1.4. Configuration CORS (Cross-Origin Resource Sharing)
+
+**CORS** permet à votre client web (Angular, React, etc.) d'accéder à l'API depuis un domaine différent.
+
+#### Configuration en Développement
+
+Par défaut en développement, les origines autorisées sont :
+```
+http://localhost:3000  (l'API elle-même)
+http://localhost:4200  (Client Angular standard)
+http://localhost:3001  (Client React standard)
+```
+
+#### Configuration en Production
+
+Modifiez la variable `CORS_ORIGIN` dans votre `.env` :
+
+```env
+# Production - Un seul domaine
+CORS_ORIGIN=https://app.projet-pedagogique.com
+
+# Production - Plusieurs domaines
+CORS_ORIGIN=https://app.projet-pedagogique.com,https://admin.projet-pedagogique.com,https://api.exemple.com
+```
+
+#### Règles Importantes
+
+✅ **Toujours utiliser HTTPS en production**  
+✅ **Spécifier les origines exactes** - Ne jamais utiliser `*` en production  
+✅ **Inclure le protocole et le port** - `https://exemple.com:443` ou `http://localhost:3000`  
+✅ **Séparer les origines par des virgules** sans espaces après  
+✅ **Configurer `credentials: true`** pour autoriser les cookies (déjà fait)  
+
+#### Dépannage CORS
+
+**Erreur : "Access to XMLHttpRequest blocked by CORS policy"**
+
+1. Vérifier que votre domaine est dans `CORS_ORIGIN`
+2. Vérifier que vous utilisez `withCredentials: true` en client
+3. Vérifier les **méthodes HTTP** autorisées (GET, POST, PUT, DELETE, PATCH)
+4. Vérifier les **headers** autorisés (Content-Type, Authorization)
+
+**Exemple d'erreur CORS :**
+```
+Access to XMLHttpRequest at 'http://localhost:3000/api/projets' from origin 
+'http://localhost:4200' has been blocked by CORS policy: 
+Response to preflight request doesn't pass access control check
+```
+
+**Solution :**
+```env
+# .env
+CORS_ORIGIN=http://localhost:3000,http://localhost:4200
+```
+
 ---
+
+## 1.3. Démarrage de l'API
 
 ## 2. Authentification
 
@@ -195,12 +256,35 @@ Cookie: connect.sid=s%3A....
 **Réponse 200 :**
 ```json
 {
-  "success": true,
   "message": "Déconnexion réussie"
 }
 ```
 
-### 2.3. Gestion des Cookies en Client
+**Note** : Le cookie de session est automatiquement effacé par le serveur.
+
+#### Récupérer l'Utilisateur Connecté
+
+```http
+GET /auth/me
+Cookie: connect.sid=s%3A....
+```
+
+**Réponse 200 :**
+```json
+{
+  "animateur": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "email": "animateur@example.com",
+    "nom": "Jean Dupont",
+    "bio": "BAFA depuis 5 ans",
+    "created_at": "2026-02-11T09:00:00Z",
+    "updated_at": "2026-02-11T09:00:00Z"
+  }
+}
+```
+
+**Erreurs possibles :**
+- `401` : Non authentifié ou compte supprimé
 
 **JavaScript/Fetch :**
 ```javascript

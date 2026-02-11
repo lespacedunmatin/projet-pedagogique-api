@@ -52,7 +52,17 @@ Consultez [**API_PROJET_PEDAGOGIQUE.md**](./API_PROJET_PEDAGOGIQUE.md) pour :
 - Gestion des erreurs et codes HTTP
 - Exemples de flux métier complets
 - Hooks React recommandés
-- Checklist pour développeurs
+- **Optimisé pour le développement assisté par IA**
+
+### 🔐 Configuration CORS et Sécurité
+
+Consultez [**CORS_SECURITY.md**](./CORS_SECURITY.md) pour :
+- Configuration de CORS pour développement et production
+- Points de sécurité importants
+- Dépannage des erreurs CORS
+- Sécurité des sessions et cookies
+- Configuration Helmet.js
+- Checklist de déploiement production
 - **Optimisé pour le développement assisté par IA**
 
 ### 📖 Spécifications Techniques de l'API

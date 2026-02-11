@@ -436,3 +436,223 @@ describe('POST /auth/login', () => {
   });
 });
 
+describe('POST /auth/logout', () => {
+  let authCookie: string;
+  const password = 'SecurePass123!';
+  const email = 'logout-test@example.com';
+
+  beforeEach(async () => {
+    // Créer un animateur et obtenir la session
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await Animateur.create({
+      email,
+      password: hashedPassword,
+      nom: 'Test Logout User',
+    });
+
+    // Se connecter pour obtenir le cookie
+    const response = await request(app)
+      .post('/auth/login')
+      .send({
+        email,
+        password,
+      })
+      .expect(200);
+
+    authCookie = response.headers['set-cookie'][0];
+  });
+
+  afterEach(async () => {
+    // Nettoyer les données créées
+    await Animateur.destroy({ where: {} });
+  });
+
+  it('devrait déconnecter un utilisateur avec succès', async () => {
+    const response = await request(app)
+      .post('/auth/logout')
+      .set('cookie', authCookie)
+      .expect(200);
+
+    expect(response.body.message).toBe('Déconnexion réussie');
+    expect(response.headers['set-cookie']).toBeDefined();
+  });
+
+  it('devrait effacer le cookie de session lors de la déconnexion', async () => {
+    const response = await request(app)
+      .post('/auth/logout')
+      .set('cookie', authCookie)
+      .expect(200);
+
+    // Vérifier que le cookie est effacé
+    const setCookieHeaders = response.headers['set-cookie'];
+    expect(setCookieHeaders).toBeDefined();
+
+    // Le cookie devrait contenir "connect.sid" et être vide ou expiré
+    const cookieHeaderString = Array.isArray(setCookieHeaders)
+      ? setCookieHeaders.join('; ')
+      : setCookieHeaders;
+    expect(cookieHeaderString).toContain('connect.sid');
+  });
+
+  it('devrait permettre la déconnexion sans être authentifié', async () => {
+    const response = await request(app)
+      .post('/auth/logout')
+      .expect(200);
+
+    expect(response.body.message).toBe('Déconnexion réussie');
+  });
+
+  it('devrait permettre d\'utiliser la session après déconnexion', async () => {
+    // Déconnecter l'utilisateur
+    await request(app)
+      .post('/auth/logout')
+      .set('cookie', authCookie)
+      .expect(200);
+
+    // Essayer d'utiliser la session pour accéder à une route protégée
+    // (Les routes protégées retourneront 401 car la session est détruite)
+    // On teste avec la route POST /auth/login qui doit échouer si authentifié
+    const response = await request(app)
+      .post('/auth/login')
+      .set('cookie', authCookie)
+      .send({
+        email,
+        password,
+      })
+      .expect(200); // Devrait réussir car la session est détruite
+
+    expect(response.body.message).toBe('Connexion réussie');
+  });
+
+  it('devrait retourner un message de succès même si la session n\'existait pas', async () => {
+    const response = await request(app)
+      .post('/auth/logout')
+      .expect(200);
+
+    expect(response.body.message).toBe('Déconnexion réussie');
+  });
+});
+
+describe('GET /auth/me', () => {
+  let authCookie: string;
+  const password = 'SecurePass123!';
+  const email = 'me-test@example.com';
+  const nom = 'Test Me User';
+  const bio = 'Test bio';
+
+  beforeEach(async () => {
+    // Créer un animateur et obtenir la session
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await Animateur.create({
+      email,
+      password: hashedPassword,
+      nom,
+      bio,
+    });
+
+    // Se connecter pour obtenir le cookie
+    const response = await request(app)
+      .post('/auth/login')
+      .send({
+        email,
+        password,
+      })
+      .expect(200);
+
+    authCookie = response.headers['set-cookie'][0];
+  });
+
+  afterEach(async () => {
+    // Nettoyer les données créées
+    await Animateur.destroy({ where: {} });
+  });
+
+  it('devrait retourner les données de l\'utilisateur connecté', async () => {
+    const response = await request(app)
+      .get('/auth/me')
+      .set('cookie', authCookie)
+      .expect(200);
+
+    expect(response.body.animateur).toBeDefined();
+    expect(response.body.animateur.id).toBeDefined();
+    expect(response.body.animateur.email).toBe(email);
+    expect(response.body.animateur.nom).toBe(nom);
+    expect(response.body.animateur.bio).toBe(bio);
+  });
+
+  it('devrait retourner les dates de création et modification', async () => {
+    const response = await request(app)
+      .get('/auth/me')
+      .set('cookie', authCookie)
+      .expect(200);
+
+    expect(response.body.animateur.created_at).toBeDefined();
+    expect(response.body.animateur.updated_at).toBeDefined();
+  });
+
+  it('ne devrait pas retourner le mot de passe', async () => {
+    const response = await request(app)
+      .get('/auth/me')
+      .set('cookie', authCookie)
+      .expect(200);
+
+    expect(response.body.animateur.password).toBeUndefined();
+    expect(JSON.stringify(response.body)).not.toContain('SecurePass');
+  });
+
+  it('devrait retourner 401 si l\'utilisateur n\'est pas authentifié', async () => {
+    const response = await request(app)
+      .get('/auth/me')
+      .expect(401);
+
+    expect(response.body.error).toBe('Vous devez être authentifié pour accéder à cette ressource');
+  });
+
+  it('devrait retourner 401 si le compte a été supprimé', async () => {
+    // Supprimer l'animateur
+    const animateur = await Animateur.findOne({ where: { email } });
+    if (animateur) {
+      await animateur.destroy();
+    }
+
+    const response = await request(app)
+      .get('/auth/me')
+      .set('cookie', authCookie)
+      .expect(401);
+
+    expect(response.body.error).toBe('Utilisateur non trouvé ou compte supprimé');
+  });
+
+  it('devrait retourner les données de l\'utilisateur avec une session valide', async () => {
+    // Faire plusieurs requêtes pour vérifier que la session persiste
+    const response1 = await request(app)
+      .get('/auth/me')
+      .set('cookie', authCookie)
+      .expect(200);
+
+    const response2 = await request(app)
+      .get('/auth/me')
+      .set('cookie', authCookie)
+      .expect(200);
+
+    expect(response1.body.animateur.id).toBe(response2.body.animateur.id);
+    expect(response1.body.animateur.email).toBe(response2.body.animateur.email);
+  });
+
+  it('devrait retourner 401 après déconnexion', async () => {
+    // Déconnecter l'utilisateur
+    await request(app)
+      .post('/auth/logout')
+      .set('cookie', authCookie)
+      .expect(200);
+
+    // Essayer d'accéder à /me avec le cookie de session détruite
+    const response = await request(app)
+      .get('/auth/me')
+      .set('cookie', authCookie)
+      .expect(401);
+
+    expect(response.body.error).toBe('Vous devez être authentifié pour accéder à cette ressource');
+  });
+});
+

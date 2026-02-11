@@ -215,4 +215,76 @@ router.post('/login', isNotAuthenticated, async (req: Request, res: Response) =>
   }
 });
 
+/**
+ * POST /auth/logout
+ * Déconnecte l'utilisateur et détruit la session
+ */
+router.post('/logout', (req: Request, res: Response) => {
+  try {
+    // Détruire la session
+    req.session.destroy((error: any) => {
+      if (error) {
+        console.error('Erreur lors de la destruction de la session:', error);
+        return res.status(500).json({
+          error: 'Erreur lors de la déconnexion',
+        });
+      }
+
+      // Effacer le cookie de session
+      res.clearCookie('connect.sid');
+
+      return res.status(200).json({
+        message: 'Déconnexion réussie',
+      });
+    });
+  } catch (error) {
+    console.error('Erreur lors de la déconnexion:', error);
+    return res.status(500).json({
+      error: 'Erreur serveur lors de la déconnexion',
+    });
+  }
+});
+
+/**
+ * GET /auth/me
+ * Retourne les informations de l'utilisateur connecté
+ */
+router.get('/me', async (req: Request, res: Response) => {
+  try {
+    // Vérifier si l'utilisateur est authentifié
+    const userId = (req.session as any).userId;
+    if (!userId) {
+      return res.status(401).json({
+        error: 'Vous devez être authentifié pour accéder à cette ressource',
+      });
+    }
+
+    // Rechercher l'animateur par ID
+    const animateur = await Animateur.findByPk(userId);
+
+    // Vérifier que l'animateur existe et n'est pas supprimé
+    if (!animateur || animateur.deleted_at !== null) {
+      return res.status(401).json({
+        error: 'Utilisateur non trouvé ou compte supprimé',
+      });
+    }
+
+    return res.status(200).json({
+      animateur: {
+        id: animateur.id,
+        email: animateur.email,
+        nom: animateur.nom,
+        bio: animateur.bio,
+        created_at: animateur.created_at,
+        updated_at: animateur.updated_at,
+      },
+    });
+  } catch (error) {
+    console.error('Erreur lors de la récupération de l\'utilisateur:', error);
+    return res.status(500).json({
+      error: 'Erreur serveur lors de la récupération de l\'utilisateur',
+    });
+  }
+});
+
 export default router;

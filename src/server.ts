@@ -19,9 +19,23 @@ initializeSessionStore().catch((error) => {
 // Configurer les associations Sequelize
 setupAssociations();
 
-// Middleware de sécurité et parsing
+// Middleware de sécurité
 app.use(helmet());
-app.use(cors());
+
+// Configuration CORS
+const corsOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
+  : ['http://localhost:3000', 'http://localhost:4200'];
+
+app.use(cors({
+  origin: corsOrigins,
+  credentials: true,  // ✅ Autoriser les cookies
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  maxAge: 86400  // 24h
+}));
+
+// Parsing des données
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
