@@ -35,7 +35,7 @@ function isNotAuthenticated(req: Request, res: Response, next: NextFunction) {
   // L'utilisateur est déjà connecté
   return res.status(400).json({
     error: 'Vous êtes déjà connecté',
-    redirect: '/projets'
+    redirect: '/'
   });
 }
 
