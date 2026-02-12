@@ -27,12 +27,20 @@ router.use(isAuthenticated);
  */
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { nom, description, date_debut, date_fin, animateur_id, role } = req.body;
+    // Vérifier si l'utilisateur est authentifié
+    const animateur_id = (req.session as any).userId;
+    const { nom, description, date_debut, date_fin, role } = req.body;
+
+    if (!animateur_id) {
+      return res.status(401).json({
+        error: 'Vous devez être authentifié pour accéder à cette ressource',
+      });
+    }
 
     // Validation des champs obligatoires
-    if (!nom || !animateur_id) {
+    if (!nom) {
       return res.status(400).json({
-        error: 'Les champs nom et animateur_id sont obligatoires',
+        error: 'Le champs nom est obligatoire',
       });
     }
 
