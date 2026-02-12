@@ -22,15 +22,19 @@ router.use(isAuthenticated);
 router.post('/:projet_id/objectifs', async (req: Request, res: Response) => {
   try {
     const projetId = Array.isArray(req.params.projet_id) ? req.params.projet_id[0] : req.params.projet_id;
-    const { texte, ordre, animateur_id } = req.body;
+    // Vérifier si l'utilisateur est authentifié
+    const animateur_id = (req.session as any).userId;
+    const { texte, ordre } = req.body;
+
+    if (!animateur_id) {
+      return res.status(401).json({
+        error: 'Vous devez être authentifié pour accéder à cette ressource',
+      });
+    }
 
     // Validation des paramètres obligatoires
     if (!texte) {
       return res.status(400).json({ error: 'Le champ texte est obligatoire' });
-    }
-
-    if (!animateur_id) {
-      return res.status(400).json({ error: 'Le champ animateur_id est obligatoire' });
     }
 
     // Vérifier que le projet existe et n'est pas supprimé
