@@ -26,7 +26,15 @@ router.use(isAuthenticated);
 router.post('/:projet_id/activites', async (req: Request, res: Response) => {
   try {
     const projetId = Array.isArray(req.params.projet_id) ? req.params.projet_id[0] : req.params.projet_id;
-    const { nom, description, date_debut, date_fin, responsable_id, ordre, animateur_id } = req.body;
+    const animateur_id = (req.session as any).userId;
+    const { nom, description, date_debut, date_fin, responsable_id, ordre } = req.body;
+    // Vérifier si l'utilisateur est authentifié
+
+    if (!animateur_id) {
+      return res.status(401).json({
+        error: 'Vous devez être authentifié pour accéder à cette ressource',
+      });
+    }
 
     // Validation des paramètres obligatoires
     if (!nom) {
@@ -39,10 +47,6 @@ router.post('/:projet_id/activites', async (req: Request, res: Response) => {
 
     if (!date_fin) {
       return res.status(400).json({ error: 'Le champ date_fin est obligatoire' });
-    }
-
-    if (!animateur_id) {
-      return res.status(400).json({ error: 'Le champ animateur_id est obligatoire' });
     }
 
     // Validation des dates
