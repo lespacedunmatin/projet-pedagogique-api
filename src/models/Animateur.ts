@@ -4,7 +4,7 @@ import sequelize from '../database/config';
 interface AnimateurAttributes {
   id: string;
   email: string;
-  password: string;
+  password: string | null;
   nom: string;
   bio?: string;
   created_at?: Date;
@@ -12,12 +12,12 @@ interface AnimateurAttributes {
   deleted_at?: Date | null;
 }
 
-interface AnimateurCreationAttributes extends Optional<AnimateurAttributes, 'id' | 'created_at' | 'updated_at' | 'deleted_at'> {}
+interface AnimateurCreationAttributes extends Optional<AnimateurAttributes, 'id' | 'password' | 'created_at' | 'updated_at' | 'deleted_at'> {}
 
 class Animateur extends Model<AnimateurAttributes, AnimateurCreationAttributes> implements AnimateurAttributes {
   declare id: string;
   declare email: string;
-  declare password: string;
+  declare password: string | null;
   declare nom: string;
   declare bio?: string;
   declare created_at?: Date;
@@ -42,7 +42,8 @@ Animateur.init(
     },
     password: {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
+      defaultValue: null,
     },
     nom: {
       type: DataTypes.STRING(255),

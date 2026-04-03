@@ -20,7 +20,7 @@ router.use(isAuthenticated);
 router.post('/:id/animateurs', async (req: Request, res: Response) => {
   try {
     const projetId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-    const { email, role } = req.body;
+    const { email, nom, role } = req.body;
 
     // Validation des paramètres
     if (!email) {
@@ -36,13 +36,16 @@ router.post('/:id/animateurs', async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Projet non trouvé' });
     }
 
-    // Trouver l'animateur par email
-    const animateur = await Animateur.findOne({
+    // Trouver ou créer l'animateur par email
+    let animateur = await Animateur.findOne({
       where: { email, deleted_at: null },
     });
 
     if (!animateur) {
-      return res.status(404).json({ error: 'Animateur non trouvé' });
+      if (!nom) {
+        return res.status(400).json({ error: 'Le nom est obligatoire pour créer un nouvel animateur' });
+      }
+      animateur = await Animateur.create({ email, nom });
     }
 
     // Vérifier que l'animateur n'est pas déjà affecté au projet
