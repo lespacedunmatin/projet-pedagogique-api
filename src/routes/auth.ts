@@ -177,7 +177,7 @@ router.post('/login', isNotAuthenticated, async (req: Request, res: Response) =>
     }
 
     // Vérifier le mot de passe
-    const passwordMatch = await bcrypt.compare(password, animateur.password);
+    const passwordMatch = await bcrypt.compare(password, animateur.password ?? '');
     if (!passwordMatch) {
       return res.status(401).json({
         error: 'Email ou mot de passe incorrect',

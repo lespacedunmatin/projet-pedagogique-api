@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import morgan from 'morgan';
 import { setupAssociations } from './database/associations';
 import { sessionMiddleware, initializeSessionStore } from './config/session';
 import animateursRouter from './routes/animateurs';
@@ -21,6 +22,9 @@ setupAssociations();
 
 // Middleware de sécurité
 app.use(helmet());
+
+// Middleware de log
+app.use(morgan('dev'));
 
 // Configuration CORS
 const corsOrigins = process.env.CORS_ORIGIN

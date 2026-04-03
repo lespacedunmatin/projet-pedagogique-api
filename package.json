@@ -29,6 +29,7 @@
     "@types/express": "^5.0.6",
     "@types/express-session": "^1.17.10",
     "@types/jest": "^30.0.0",
+    "@types/morgan": "^1.9.10",
     "@types/node": "^20.10.0",
     "@types/supertest": "^6.0.3",
     "jest": "^30.2.0",
@@ -45,6 +46,7 @@
     "express-session": "^1.17.3",
     "helmet": "^8.1.0",
     "mariadb": "^3.4.5",
-    "sequelize": "^6.37.7"
+    "morgan": "^1.10.1",
+    "sequelize": "6.37.8"
   }
 }
